@@ -16,13 +16,13 @@ def listen():
     while True:
         regAddressBuff = bytearray(1)
 
-        # First thing master should send is register address.
+        # First thing controller should send is register address.
         # Poll to see if it has been received yet.
         if not i2c.have_recv_req():
             continue
         i2c.recv(regAddressBuff, timeout=0)
 
-        # Wait for master to send either the read or write.
+        # Wait for controller to send either the read or write.
         while (not i2c.have_recv_req()) and (not i2c.have_send_req()):
             pass
 
@@ -43,7 +43,7 @@ def listen():
                     display.update()
 
         elif regAddress in [0x20, 0x21, 0x22, 0x23, 0x24, 0x25]:
-            # Handle the master read/write request.
+            # Handle the controller read/write request.
             if i2c.have_recv_req():
                 try:
                     data_addr = regAddress & 0xF

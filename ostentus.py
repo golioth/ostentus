@@ -7,7 +7,8 @@ def listen():
     display.thickness(2)
 
     i2c = i2cperipheral.I2CPeripheral(bus=0, sclPin=5, sdaPin=4, address=0x12)
-    refresh_byte=bytearray(1)
+    clear_byte = bytearray(1)
+    refresh_byte = bytearray(1)
     data = list()
     for i in range(7):
         data.append(bytearray(b'\x00'*32))
@@ -29,18 +30,30 @@ def listen():
         # Only support read/write requests for register 0x01.
         regAddress = regAddressBuff[0]
         if regAddress == 0x00:
-            display.pen(15)
-            display.clear()
+            if i2c.have_recv_req():
+                try:
+                    i2c.recv(clear_byte, timeout=1000)
+
+                    display.pen(15)
+                    display.clear()
+
+                    if clear_byte[0] != 0x00:
+                        display.update_speed(0x00)
+                        display.update()
+                except OSError:
+                    pass
+
         if regAddress == 0x01:
             if i2c.have_recv_req():
                 try:
                     i2c.recv(refresh_byte, timeout=1000)
+
+                    if 0x00 <= refresh_byte[0] <= 0x03:
+                        display.update_speed(refresh_byte[0])
+                        display.update()
+
                 except OSError:
                     pass
-
-                if 0x00 <= refresh_byte[0] <= 0x03:
-                    display.update_speed(refresh_byte[0])
-                    display.update()
 
         elif regAddress in [0x20, 0x21, 0x22, 0x23, 0x24, 0x25]:
             # Handle the controller read/write request.

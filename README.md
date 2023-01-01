@@ -25,7 +25,9 @@ Use any i2c-controller to write to the display on device-address 0x12.
 
 Memory register map:
 
-* 0x00: clear all memory (does not trigger a screen refresh)
+* 0x00: clear display framebuffer memory
+  * Register value: 1-byte (0x01 == refresh display, anything else is clear
+    memory without refreshing the display)
 * 0x01: refresh display from memory
   * Register value: 1-byte for [Badger update speed](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/badger2040#update-speed-1)
   * 0x00: UPDATE_NORMAL

@@ -9,9 +9,9 @@ def listen():
     i2c = i2cperipheral.I2CPeripheral(bus=0, sclPin=5, sdaPin=4, address=0x12)
     clear_byte = bytearray(1)
     refresh_byte = bytearray(1)
-    data = list()
+    str_data = list()
     for i in range(7):
-        data.append(bytearray(b'\x00'*32))
+        str_data.append(bytearray(b'\x00'*32))
 
     print("Listening...")
     while True:
@@ -60,15 +60,15 @@ def listen():
             if i2c.have_recv_req():
                 try:
                     data_addr = regAddress & 0xF
-                    data[data_addr] = bytearray(b'\x00'*32)
-                    i2c.recv(data[data_addr], timeout=1000)
+                    str_data[data_addr] = bytearray(b'\x00'*32)
+                    i2c.recv(str_data[data_addr], timeout=1000)
 
                 except OSError:
                     pass
 
                 display.pen(0)
                 outstring=""
-                for c in data[data_addr]:
+                for c in str_data[data_addr]:
                     if c < 0x20 or c > 0x7E:
                         outstring += ' '
                     else:

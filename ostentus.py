@@ -16,10 +16,17 @@ class ostentus:
         x_loc = 0
         y_loc = 0
 
-    def clear_memory(self):
+    def clear_all_memory(self, clear_display=False):
         self.str_data = [bytearray(b'\x00'*32)]*6
         x_loc = 0
         y_loc = 0
+
+        self.display.pen(15)
+        self.display.clear()
+
+        if clear_display:
+            self.display.update_speed(0x00)
+            self.display.update()
 
     def clear_str_memory(self, line_idx):
         self.str_data[line_idx] = bytearray(b'\x00'*32)
@@ -46,7 +53,7 @@ class ostentus:
         refresh_byte = bytearray(1)
         coordinates = bytearray(2)
 
-        self.clear_memory()
+        self.clear_all_memory()
         print("Listening...")
         while True:
             regAddressBuff = bytearray(1)
@@ -61,22 +68,19 @@ class ostentus:
             while (not i2c.have_recv_req()) and (not i2c.have_send_req()):
                 pass
 
-            # Only support read/write requests for register 0x01.
+            # Addr 0x00: clear memory
             regAddress = regAddressBuff[0]
             if regAddress == 0x00:
                 if i2c.have_recv_req():
                     try:
                         i2c.recv(clear_byte, timeout=1000)
-
-                        self.display.pen(15)
-                        self.display.clear()
-
-                        if clear_byte[0] != 0x00:
-                            self.display.update_speed(0x00)
-                            self.display.update()
                     except OSError:
+                        print("Error: timout receiving memory clear command")
                         pass
 
+                self.clear_all_memory(clear_byte[0])
+
+            # Addr 0x01: refresh display
             if regAddress == 0x01:
                 if i2c.have_recv_req():
                     try:
@@ -89,6 +93,7 @@ class ostentus:
                     except OSError:
                         pass
 
+            # Addr 0x020..0x26: store string in memory
             elif regAddress in [0x20, 0x21, 0x22, 0x23, 0x24, 0x25]:
                 # Handle the controller read/write request.
                 if i2c.have_recv_req():

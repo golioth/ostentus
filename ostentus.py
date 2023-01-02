@@ -13,13 +13,13 @@ class ostentus:
         self.display.thickness(2)
 
         self.str_data = [bytearray(b'\x00'*32)]*6
-        x_loc = 0
-        y_loc = 0
+        self.x_loc = 0
+        self.y_loc = 0
 
     def clear_all_memory(self, clear_display=False):
         self.str_data = [bytearray(b'\x00'*32)]*6
-        x_loc = 0
-        y_loc = 0
+        self.x_loc = 0
+        self.y_loc = 0
 
         self.display.pen(15)
         self.display.clear()
@@ -43,7 +43,7 @@ class ostentus:
             else:
                 outstring += chr(c)
         print("outstring:",outstring)
-        self.display.text(outstring, 0, 10+(22*line_idx), 0.7)
+        self.display.text(outstring, self.x_loc, 10+(22*line_idx), 0.7)
 
     def listen(self):
 
@@ -76,7 +76,7 @@ class ostentus:
                         i2c.recv(clear_byte, timeout=1000)
                     except OSError:
                         print("Error: timout receiving memory clear command")
-                        pass
+                        continue
 
                 self.clear_all_memory(clear_byte[0])
 
@@ -91,7 +91,31 @@ class ostentus:
                             self.display.update()
 
                     except OSError:
+                        print("Error: timout receiving display refresh command")
                         pass
+
+            # Addr 0x02..0x03: change x_loc or y_loc offsets
+            if regAddress in [0x02, 0x03]:
+                if i2c.have_recv_req():
+                    try:
+                        coordinates = bytearray(b'\x00'*2)
+                        i2c.recv(coordinates, timeout=1000)
+
+                    except OSError:
+                        print("Error: timout receiving new x/y location")
+                        continue
+
+                    loc_value = int.from_bytes(coordinates, "big")
+                    if regAddress == 0x02:
+                        if 0x00 <= loc_value < badger2040.WIDTH:
+                            self.x_loc = loc_value
+                        else:
+                            print("Received x index out of bounds:", loc_value)
+                    if regAddress == 0x03:
+                        if 0x00 <= loc_value < badger2040.HEIGHT:
+                            self.y_loc = loc_value
+                        else:
+                            print("Received y index out of bounds:", loc_value)
 
             # Addr 0x020..0x26: store string in memory
             elif regAddress in [0x20, 0x21, 0x22, 0x23, 0x24, 0x25]:
@@ -103,6 +127,7 @@ class ostentus:
                         i2c.recv(self.str_data[data_addr], timeout=1000)
 
                     except OSError:
+                        print("Timout receiving string (assuming this is the end of the string)")
                         pass
 
                     self.write_string(data_addr)

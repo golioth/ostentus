@@ -34,9 +34,11 @@ Memory register map:
   * 0x01: UPDATE_MEDIUM
   * 0x02: UPDATE_FAST
   * 0x03: UPDATE_TURBO
-* 0x20: memory for line 0 on the display (memory max 32 characters)
+* 0x02: update the starting column (x_loc: 0..295)
+* 0x03: update the starting row (y_loc: 0..127)
+* 0x20: memory for line 0 on the display (starting from x_loc column)
 * ...
-* 0x26: memory for line 6 on the display (memory max 32 characters)
+* 0x26: memory for line 6 on the display (starting from x_loc column)
 
 The font used is not monospace, so the 32 character max is a memory limit, not
 an indication of what will fit on the display.

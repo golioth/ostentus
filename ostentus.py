@@ -31,6 +31,12 @@ class ostentus:
     def clear_str_memory(self, line_idx):
         self.str_data[line_idx] = bytearray(b'\x00'*32)
 
+    def show_splash(self):
+        splash = bytearray(int(296 * 128 / 8))
+        open("splashscreen_rd.bin", 'r').readinto(splash)
+        self.display.image(splash)
+        self.display.update()
+
     def write_string(self, line_idx):
         self.display.pen(0)
         outstring=""
@@ -49,6 +55,7 @@ class ostentus:
 
         i2c = i2cperipheral.I2CPeripheral(bus=self.bus, sclPin=self.sclPin,
                 sdaPin=self.sdaPin, address=self.address)
+        misc_byte = bytearray(1)
         clear_byte = bytearray(1)
         refresh_byte = bytearray(1)
         coordinates = bytearray(2)
@@ -116,6 +123,17 @@ class ostentus:
                             self.y_loc = loc_value
                         else:
                             print("Received y index out of bounds:", loc_value)
+
+            # Addr 0x04: show Golioth splashscreen
+            if regAddress == 0x04:
+                if i2c.have_recv_req():
+                    try:
+                        i2c.recv(misc_byte, timeout=1000)
+                        self.show_splash()
+
+                    except OSError:
+                        print("Error: could not display the splashscreen")
+                        pass
 
             # Addr 0x020..0x26: store string in memory
             elif regAddress in [0x20, 0x21, 0x22, 0x23, 0x24, 0x25]:

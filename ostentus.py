@@ -23,7 +23,10 @@ class ostentus:
         self.display.pen(0)
         outstring=""
         for c in self.str_data[line_idx]:
-            if c < 0x20 or c > 0x7E:
+            if c == 0x00:
+                # assume null terminator is a the end of the string
+                break
+            elif c < 0x20 or c > 0x7E:
                 outstring += ' '
             else:
                 outstring += chr(c)
@@ -85,7 +88,7 @@ class ostentus:
                 if i2c.have_recv_req():
                     try:
                         data_addr = regAddress & 0xF
-                        self.str_data[data_addr] = bytearray(b'\x00'*32)
+                        self.clear_str_memory(data_addr)
                         i2c.recv(self.str_data[data_addr], timeout=1000)
 
                     except OSError:

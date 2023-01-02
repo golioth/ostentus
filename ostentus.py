@@ -2,7 +2,12 @@ import i2cperipheral
 import badger2040
 
 class ostentus:
-    def __init__(self):
+    def __init__(self, bus=0, sclPin=5, sdaPin=4, address=0x12):
+        self.bus = bus
+        self.sclPin = sclPin
+        self.sdaPin = sdaPin
+        self.address = address
+
         self.display=badger2040.Badger2040()
         self.display.font("serif")
         self.display.thickness(2)
@@ -35,7 +40,8 @@ class ostentus:
 
     def listen(self):
 
-        i2c = i2cperipheral.I2CPeripheral(bus=0, sclPin=5, sdaPin=4, address=0x12)
+        i2c = i2cperipheral.I2CPeripheral(bus=self.bus, sclPin=self.sclPin,
+                sdaPin=self.sdaPin, address=self.address)
         clear_byte = bytearray(1)
         refresh_byte = bytearray(1)
         coordinates = bytearray(2)

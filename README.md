@@ -5,8 +5,8 @@ Reference Designs.
 
 ## Installation
 
-Load [version 1.18.3 of the Badger2040 micropython
-build](https://github.com/pimoroni/pimoroni-pico/releases/tag/v1.18.3). The
+Load [version 1.19.10 of the Badger2040 micropython
+build](https://github.com/pimoroni/pimoroni-pico/releases/tag/v1.19.10). The
 badge will enumerate as USB mass storage when the Boot button is held while
 reset is pressed and released. Copy the python file onto the drive and it will
 automatically flash and reboot.
@@ -72,6 +72,6 @@ steps to build a more modern version:
 1. Clone the i2cperipheral repo
 2. Run `make init` to initialize the library
 3. Enter the `micropython` library and run `git stash`
-4. Use `git checkout v1.18.3` to check out the correct version
+4. Use `git checkout v1.19` to check out the correct version
 5. Go back to the i2cperipheral directory and run `make init`
 6. Run `make` to build i2cperipheral.mpy which can be placed on the Badger2040

@@ -1,6 +1,7 @@
 import i2cperipheral
 import badger2040
 import splashscreen_rd
+from ostentus_leds import o_leds
 
 class ostentus:
     def __init__(self, bus=0, sclPin=5, sdaPin=4, address=0x12):
@@ -16,6 +17,9 @@ class ostentus:
         self.str_data = [bytearray(b'\x00'*32)]*6
         self.x_loc = 0
         self.y_loc = 0
+
+        self.leds = o_leds()
+        self.leds.boot_animation()
 
     def clear_all_memory(self, clear_display=False):
         self.str_data = [bytearray(b'\x00'*32)]*6
@@ -134,6 +138,17 @@ class ostentus:
                     except OSError:
                         print("Error: could not display the splashscreen")
                         pass
+
+            # Addr 0x05: set/clear LEDs from bitmask
+            if regAddress == 0x05:
+                if i2c.have_recv_req():
+                    try:
+                        i2c.recv(clear_byte, timeout=1000)
+                    except OSError:
+                        print("Error: timout receiving LED bitmask")
+                        continue
+
+                self.leds.process_bitmask(clear_byte[0])
 
             # Addr 0x020..0x26: store string in memory
             elif regAddress in [0x20, 0x21, 0x22, 0x23, 0x24, 0x25]:

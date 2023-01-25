@@ -26,7 +26,7 @@ class ostentus:
         self.x_loc = 0
         self.y_loc = 0
 
-        self.display.pen(15)
+        self.display.pen(0)
         self.display.clear()
 
         if clear_display:
@@ -42,7 +42,7 @@ class ostentus:
         self.display.update()
 
     def write_string(self, line_idx):
-        self.display.pen(0)
+        self.display.pen(15)
         outstring=""
         for c in self.str_data[line_idx]:
             if c == 0x00:

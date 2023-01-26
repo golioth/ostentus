@@ -171,7 +171,17 @@ class ostentus:
                     self.write_string(data_addr)
 
             else:
-                continue
+                # Clear receive bytes so they don't get reprocessed as a regAddress
+                print("Ignoring command on regAddress: ", regAddress)
+                if i2c.have_recv_req():
+                    try:
+                        null_buffer = bytearray(128)
+                        i2c.recv(null_buffer, timeout=100)
+                        del null_buffer
+                        continue
+
+                    except OSError:
+                        continue
 
 def main():
     o = ostentus()

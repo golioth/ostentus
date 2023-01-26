@@ -28,6 +28,7 @@ class ostentus:
 
         self.display.pen(0)
         self.display.clear()
+        self.display.pen(15)
 
         if clear_display:
             self.display.update_speed(0x00)

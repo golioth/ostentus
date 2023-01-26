@@ -93,7 +93,7 @@ class ostentus:
                 self.clear_all_memory(clear_byte[0])
 
             # Addr 0x01: refresh display
-            if regAddress == 0x01:
+            elif regAddress == 0x01:
                 if i2c.have_recv_req():
                     try:
                         i2c.recv(refresh_byte, timeout=1000)
@@ -107,7 +107,7 @@ class ostentus:
                         pass
 
             # Addr 0x02..0x03: change x_loc or y_loc offsets
-            if regAddress in [0x02, 0x03]:
+            elif regAddress in [0x02, 0x03]:
                 if i2c.have_recv_req():
                     try:
                         coordinates = bytearray(b'\x00'*2)
@@ -130,7 +130,7 @@ class ostentus:
                             print("Received y index out of bounds:", loc_value)
 
             # Addr 0x04: show Golioth splashscreen
-            if regAddress == 0x04:
+            elif regAddress == 0x04:
                 if i2c.have_recv_req():
                     try:
                         i2c.recv(misc_byte, timeout=1000)
@@ -140,16 +140,20 @@ class ostentus:
                         print("Error: could not display the splashscreen")
                         pass
 
-            # Addr 0x05: set/clear LEDs from bitmask
-            if regAddress == 0x05:
+            # Addr 0x10: set/clear LEDs from bitmask
+            elif regAddress in [0x10, 0x11, 0x12, 0x13, 0x14, 0x18]:
+                print("Processing: ", regAddress)
                 if i2c.have_recv_req():
                     try:
                         i2c.recv(clear_byte, timeout=1000)
                     except OSError:
                         print("Error: timout receiving LED bitmask")
                         continue
+                led_f = { 0x10:self.leds.user, 0x11:self.leds.golioth,
+                        0x12:self.leds.internet, 0x13:self.leds.battery,
+                        0x14:self.leds.power, 0x18:self.leds.process_bitmask  }
 
-                self.leds.process_bitmask(clear_byte[0])
+                led_f[regAddress](clear_byte[0])
 
             # Addr 0x020..0x26: store string in memory
             elif regAddress in [0x20, 0x21, 0x22, 0x23, 0x24, 0x25]:
@@ -175,3 +179,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

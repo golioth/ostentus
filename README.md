@@ -37,6 +37,12 @@ Memory register map:
 * 0x02: update the starting column (x_loc: 0..295)
 * 0x03: update the starting row (y_loc: 0..127)
 * 0x04: show splashscreen
+* 0x10: set User icon LED (0x00=OFF otherwise ON)
+* 0x11: set Golioth icon LED (0x00=OFF otherwise ON)
+* 0x12: set Internet icon LED (0x00=OFF otherwise ON)
+* 0x13: set Batter icon LED (0x00=OFF otherwise ON)
+* 0x14: set Power icon LED (0x00=OFF otherwise ON)
+* 0x15: set LEDs from bitmask. State of bits 0..4 turn on/off LEDs listed above
 * 0x20: memory for line 0 on the display (starting from x_loc column)
 * ...
 * 0x26: memory for line 6 on the display (starting from x_loc column)

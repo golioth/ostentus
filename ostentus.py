@@ -205,6 +205,24 @@ class ostentus:
                     print("Clearing text buffer")
                 continue
 
+            # Addr 0x09: clear a rectangle bounded by x, y, w, h
+            elif regAddress == 0x09:
+                if i2c.have_recv_req():
+                    rect_data = bytearray(4)
+                    try:
+                        i2c.recv(rect_data, timeout=100)
+
+                    except OSError:
+                        print("Error: failed to receive clear rectangle data")
+                        continue
+
+                    print("Clearing rectangle")
+                    self.display.pen(0)
+                    self.display.rectangle(rect_data[0], rect_data[1], rect_data[2], rect_data[3])
+                    self.display.pen(15)
+                continue
+
+
             # Addr 0x10..0x14: set/clear LEDs
             # Addr 0x18 set/clear LEDs from bitmask
             elif regAddress in [0x10, 0x11, 0x12, 0x13, 0x14, 0x18]:

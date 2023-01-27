@@ -170,12 +170,13 @@ class ostentus:
                         self.display.font(fonts[misc_byte[0]])
 
                     except OSError:
-                        print("Error: could not display the splashscreen")
+                        print("Error: could not change the font")
                         continue
 
                     print("Updating font to: ", fonts[misc_byte[0]])
                 continue
 
+            # Addr 0x07: write the stored text to display memory
             elif regAddress == 0x07:
                 if i2c.have_recv_req():
                     text_params = bytearray(3)
@@ -188,6 +189,20 @@ class ostentus:
 
                     print("Writing stored text to screen. x={} y={} scale={}".format(text_params[0], text_params[1], text_params[2]/10))
                     self.display.text(self.text_buffer, text_params[0], text_params[1], text_params[2]/10)
+                continue
+
+            # Addr 0x08: clear the text buffer
+            elif regAddress == 0x08:
+                if i2c.have_recv_req():
+                    try:
+                        i2c.recv(misc_byte, timeout=100)
+                        self.text_buffer = ""
+
+                    except OSError:
+                        print("Error: could not clear the text buffer")
+                        continue
+
+                    print("Clearing text buffer")
                 continue
 
             # Addr 0x10..0x14: set/clear LEDs

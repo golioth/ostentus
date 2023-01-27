@@ -91,6 +91,7 @@ class ostentus:
                         continue
 
                 self.clear_all_memory(clear_byte[0])
+                continue
 
             # Addr 0x01: refresh display
             elif regAddress == 0x01:
@@ -104,7 +105,7 @@ class ostentus:
 
                     except OSError:
                         print("Error: timout receiving display refresh command")
-                        pass
+                continue
 
             # Addr 0x02..0x03: change x_loc or y_loc offsets
             elif regAddress in [0x02, 0x03]:
@@ -128,6 +129,7 @@ class ostentus:
                             self.y_loc = loc_value
                         else:
                             print("Received y index out of bounds:", loc_value)
+                continue
 
             # Addr 0x04: show Golioth splashscreen
             elif regAddress == 0x04:
@@ -138,14 +140,46 @@ class ostentus:
 
                     except OSError:
                         print("Error: could not display the splashscreen")
-                        pass
+                        continue
 
-            # Addr 0x10: set/clear LEDs from bitmask
-            elif regAddress in [0x10, 0x11, 0x12, 0x13, 0x14, 0x18]:
-                print("Processing: ", regAddress)
+                    print("Showing splashscreen")
+                continue
+
+            # Addr 0x05: change the pen thickness
+            elif regAddress == 0x05:
                 if i2c.have_recv_req():
                     try:
-                        i2c.recv(clear_byte, timeout=1000)
+                        i2c.recv(misc_byte, timeout=1000)
+                        self.display.thickness(misc_byte[0])
+
+                    except OSError:
+                        print("Error: could not display the splashscreen")
+                        continue
+
+                    print("Changing pen thickness to: ", misc_byte[0])
+                continue
+
+            # Addr 0x06: change the font
+            elif regAddress == 0x06:
+                if i2c.have_recv_req():
+                    try:
+                        i2c.recv(misc_byte, timeout=1000)
+                        fonts = ["sans", "gothic" "cursive" "serif" "serif_italic"]
+                        self.display.font(fonts[misc_byte[0]])
+
+                    except OSError:
+                        print("Error: could not display the splashscreen")
+                        continue
+
+                    print("Updating font to: ", fonts[misc_byte[0]])
+                continue
+
+            # Addr 0x10..0x14: set/clear LEDs
+            # Addr 0x18 set/clear LEDs from bitmask
+            elif regAddress in [0x10, 0x11, 0x12, 0x13, 0x14, 0x18]:
+                if i2c.have_recv_req():
+                    try:
+                        i2c.recv(misc_byte, timeout=1000)
                     except OSError:
                         print("Error: timout receiving LED bitmask")
                         continue
@@ -153,9 +187,11 @@ class ostentus:
                         0x12:self.leds.internet, 0x13:self.leds.battery,
                         0x14:self.leds.power, 0x18:self.leds.process_bitmask  }
 
-                led_f[regAddress](clear_byte[0])
+                print("Updating LED: ", regAddress, misc_byte[0])
+                led_f[regAddress](misc_byte[0])
+                continue
 
-            # Addr 0x020..0x26: store string in memory
+            # Addr 0x20..0x25: store string in memory
             elif regAddress in [0x20, 0x21, 0x22, 0x23, 0x24, 0x25]:
                 # Handle the controller read/write request.
                 if i2c.have_recv_req():
@@ -165,10 +201,13 @@ class ostentus:
                         i2c.recv(self.str_data[data_addr], timeout=1000)
 
                     except OSError:
-                        print("Timout receiving string (assuming this is the end of the string)")
+                        print("Timeout receiving string (assuming this is the end of the string)")
                         pass
 
+                    self.display.font("serif")
+                    self.display.thickness(2)
                     self.write_string(data_addr)
+                continue
 
             else:
                 # Clear receive bytes so they don't get reprocessed as a regAddress

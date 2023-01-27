@@ -15,6 +15,7 @@ class ostentus:
         self.display.thickness(2)
 
         self.str_data = [bytearray(b'\x00'*32)]*6
+        self.text_buffer = ""
         self.x_loc = 0
         self.y_loc = 0
 
@@ -23,6 +24,7 @@ class ostentus:
 
     def clear_all_memory(self, clear_display=False):
         self.str_data = [bytearray(b'\x00'*32)]*6
+        self.text_buffer = ""
         self.x_loc = 0
         self.y_loc = 0
 
@@ -174,6 +176,20 @@ class ostentus:
                     print("Updating font to: ", fonts[misc_byte[0]])
                 continue
 
+            elif regAddress == 0x07:
+                if i2c.have_recv_req():
+                    text_params = bytearray(3)
+                    try:
+                        i2c.recv(text_params, timeout=1000)
+
+                    except OSError:
+                        print("Error: could not display stored text")
+                        continue
+
+                    print("Writing stored text to screen. x={} y={} scale={}".format(text_params[0], text_params[1], text_params[2]/10))
+                    self.display.text(self.text_buffer, text_params[0], text_params[1], text_params[2]/10)
+                continue
+
             # Addr 0x10..0x14: set/clear LEDs
             # Addr 0x18 set/clear LEDs from bitmask
             elif regAddress in [0x10, 0x11, 0x12, 0x13, 0x14, 0x18]:
@@ -209,13 +225,39 @@ class ostentus:
                     self.write_string(data_addr)
                 continue
 
+            # Addr 0x26: store string in memory
+            elif regAddressBuff[0] == 0x26:
+                # Handle the controller read/write request.
+                if i2c.have_recv_req():
+                    try:
+                        immediate = bytearray(8)
+                        i2c.recv(immediate)
+
+                    except OSError:
+                        print("Timeout receiving string (assuming this is the end of the string)")
+
+                    print(immediate)
+
+                    for c in immediate:
+                        if c == 0x00:
+                            # assume null terminator is a the end of the string
+                            break
+                        elif c < 0x20 or c > 0x7E:
+                            self.text_buffer += ' '
+                        else:
+                            self.text_buffer += chr(c)
+                    print("Added to text_buffer:")
+                    print("\t", self.text_buffer)
+
+                continue
+
             else:
                 # Clear receive bytes so they don't get reprocessed as a regAddress
                 print("Ignoring command on regAddress: ", regAddress)
                 if i2c.have_recv_req():
                     try:
                         null_buffer = bytearray(128)
-                        i2c.recv(null_buffer, timeout=100)
+                        i2c.recv(null_buffer, timeout=1000)
                         del null_buffer
                         continue
 

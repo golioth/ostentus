@@ -1,4 +1,4 @@
-import i2cperipheral
+import ostentus_i2c
 import badger2040
 import splashscreen_rd
 from ostentus_leds import o_leds
@@ -58,222 +58,132 @@ class ostentus:
         print("outstring:",outstring)
         self.display.text(outstring, self.x_loc, 10+(22*line_idx), 0.7)
 
+    def print_param_count_err(cmd, expected_cnt, actual_cnt):
+        print("Error: cmd {} expects data length {} but got {}".format(cmd, expected_cnt, actual_cnt))
+
+    def init(self):
+        ostentus_i2c.init()
+
     def listen(self):
-
-        i2c = i2cperipheral.I2CPeripheral(bus=self.bus, sclPin=self.sclPin,
-                sdaPin=self.sdaPin, address=self.address)
-        misc_byte = bytearray(1)
-        clear_byte = bytearray(1)
-        refresh_byte = bytearray(1)
-        coordinates = bytearray(2)
-
         self.clear_all_memory()
         print("Listening...")
         while True:
-            regAddressBuff = bytearray(1)
+            if ostentus_i2c.has_data():
 
-            # First thing controller should send is register address.
-            # Poll to see if it has been received yet.
-            if not i2c.have_recv_req():
-                continue
-            i2c.recv(regAddressBuff, timeout=0)
+                data = ostentus_i2c.my_function()
+                if len(data) < 2:
+                    continue
+                regAddress = data[0]
+                dataLen = data[1]
+                dataStart = 2
+                if len(data) != dataLen+2:
+                    print("Error, unexpected packet length: ", len(data))
+                    print(data)
+                    continue
 
-            # Wait for controller to send either the read or write.
-            while (not i2c.have_recv_req()) and (not i2c.have_send_req()):
-                pass
+                # Addr 0x00: clear memory
+                if regAddress == 0x00:
+                    self.clear_all_memory(0)
+                    continue
 
-            # Addr 0x00: clear memory
-            regAddress = regAddressBuff[0]
-            if regAddress == 0x00:
-                if i2c.have_recv_req():
-                    try:
-                        i2c.recv(clear_byte, timeout=1000)
-                    except OSError:
-                        print("Error: timout receiving memory clear command")
+                # Addr 0x01: refresh display
+                elif regAddress == 0x01:
+                    self.display.update_speed(0)
+                    self.display.update()
+                    continue
+
+                # Addr 0x02..0x03: change x_loc or y_loc offsets
+                elif regAddress in [0x02, 0x03]:
+                    if dataLen != 1:
+                        print_param_count_err(regAddress, 1, dataLen)
                         continue
-
-                self.clear_all_memory(clear_byte[0])
-                continue
-
-            # Addr 0x01: refresh display
-            elif regAddress == 0x01:
-                if i2c.have_recv_req():
-                    try:
-                        i2c.recv(refresh_byte, timeout=1000)
-
-                        if 0x00 <= refresh_byte[0] <= 0x03:
-                            self.display.update_speed(refresh_byte[0])
-                            self.display.update()
-
-                    except OSError:
-                        print("Error: timout receiving display refresh command")
-                continue
-
-            # Addr 0x02..0x03: change x_loc or y_loc offsets
-            elif regAddress in [0x02, 0x03]:
-                if i2c.have_recv_req():
-                    try:
-                        coordinates = bytearray(b'\x00'*2)
-                        i2c.recv(coordinates, timeout=1000)
-
-                    except OSError:
-                        print("Error: timout receiving new x/y location")
-                        continue
-
-                    loc_value = int.from_bytes(coordinates, "big")
                     if regAddress == 0x02:
-                        if 0x00 <= loc_value < badger2040.WIDTH:
-                            self.x_loc = loc_value
+                        if 0x00 <= data[dataStart] < badger2040.WIDTH:
+                            self.x_loc = data[dataStart]
                         else:
                             print("Received x index out of bounds:", loc_value)
                     if regAddress == 0x03:
-                        if 0x00 <= loc_value < badger2040.HEIGHT:
-                            self.y_loc = loc_value
+                        if 0x00 <= data[dataStart] < badger2040.HEIGHT:
+                            self.y_loc = data[dataStart]
                         else:
                             print("Received y index out of bounds:", loc_value)
-                continue
+                    continue
 
-            # Addr 0x04: show Golioth splashscreen
-            elif regAddress == 0x04:
-                if i2c.have_recv_req():
-                    try:
-                        i2c.recv(misc_byte, timeout=1000)
-                        self.show_splash()
-
-                    except OSError:
-                        print("Error: could not display the splashscreen")
-                        continue
-
+                # Addr 0x04: show Golioth splashscreen
+                elif regAddress == 0x04:
+                    self.show_splash()
                     print("Showing splashscreen")
-                continue
+                    continue
 
-            # Addr 0x05: change the pen thickness
-            elif regAddress == 0x05:
-                if i2c.have_recv_req():
-                    try:
-                        i2c.recv(misc_byte, timeout=1000)
-                        self.display.thickness(misc_byte[0])
-
-                    except OSError:
-                        print("Error: could not display the splashscreen")
+                # Addr 0x05: change the pen thickness
+                elif regAddress == 0x05:
+                    if dataLen != 1:
+                        print_param_count_err(regAddress, 1, dataLen)
                         continue
+                    self.display.thickness(data[dataStart])
+                    print("Changing pen thickness to: ", data[dataStart])
+                    continue
 
-                    print("Changing pen thickness to: ", misc_byte[0])
-                continue
-
-            # Addr 0x06: change the font
-            elif regAddress == 0x06:
-                if i2c.have_recv_req():
-                    try:
-                        i2c.recv(misc_byte, timeout=1000)
-                        fonts = ["sans", "gothic" "cursive" "serif" "serif_italic"]
-                        self.display.font(fonts[misc_byte[0]])
-
-                    except OSError:
-                        print("Error: could not change the font")
+                # Addr 0x06: change the font
+                elif regAddress == 0x06:
+                    if dataLen != 1:
+                        print_param_count_err(regAddress, 1, dataLen)
                         continue
+                    fonts = ["sans", "gothic" "cursive" "serif" "serif_italic"]
+                    self.display.font(fonts[data[dataStart]])
+                    print("Updating font to: ", data[dataStart])
+                    continue
 
-                    print("Updating font to: ", fonts[misc_byte[0]])
-                continue
-
-            # Addr 0x07: write the stored text to display memory
-            elif regAddress == 0x07:
-                if i2c.have_recv_req():
-                    text_params = bytearray(3)
-                    try:
-                        i2c.recv(text_params, timeout=1000)
-
-                    except OSError:
-                        print("Error: could not display stored text")
+                # Addr 0x07: write the stored text to display memory
+                elif regAddress == 0x07:
+                    if dataLen != 3:
+                        print_param_count_err(regAddress, 3, dataLen)
                         continue
+                    print("Writing stored text to screen. x={} y={} scale={}".format(data[dataStart], data[dataStart+1], data[dataStart+2]/10))
+                    self.display.text(self.text_buffer, data[dataStart], data[dataStart+1], data[dataStart+2]/10)
+                    continue
 
-                    print("Writing stored text to screen. x={} y={} scale={}".format(text_params[0], text_params[1], text_params[2]/10))
-                    self.display.text(self.text_buffer, text_params[0], text_params[1], text_params[2]/10)
-                continue
-
-            # Addr 0x08: clear the text buffer
-            elif regAddress == 0x08:
-                if i2c.have_recv_req():
-                    try:
-                        i2c.recv(misc_byte, timeout=100)
-                        self.text_buffer = ""
-
-                    except OSError:
-                        print("Error: could not clear the text buffer")
-                        continue
-
+                # Addr 0x08: clear the text buffer
+                elif regAddress == 0x08:
+                    self.text_buffer = ""
                     print("Clearing text buffer")
-                continue
+                    continue
 
-            # Addr 0x09: clear a rectangle bounded by x, y, w, h
-            elif regAddress == 0x09:
-                if i2c.have_recv_req():
-                    rect_data = bytearray(4)
-                    try:
-                        i2c.recv(rect_data, timeout=100)
-
-                    except OSError:
-                        print("Error: failed to receive clear rectangle data")
+                # Addr 0x09: clear a rectangle bounded by x, y, w, h
+                elif regAddress == 0x09:
+                    if dataLen != 4:
+                        print_param_count_err(regAddress, 4, dataLen)
                         continue
-
                     print("Clearing rectangle")
                     self.display.pen(0)
-                    self.display.rectangle(rect_data[0], rect_data[1], rect_data[2], rect_data[3])
+                    self.display.rectangle(data[dataStart], data[dataStart+1], data[dataStart+2], data[dataStart+3])
                     self.display.pen(15)
-                continue
+                    continue
 
 
-            # Addr 0x10..0x14: set/clear LEDs
-            # Addr 0x18 set/clear LEDs from bitmask
-            elif regAddress in [0x10, 0x11, 0x12, 0x13, 0x14, 0x18]:
-                if i2c.have_recv_req():
-                    try:
-                        i2c.recv(misc_byte, timeout=1000)
-                    except OSError:
-                        print("Error: timout receiving LED bitmask")
+                # Addr 0x10..0x14: set/clear LEDs
+                # Addr 0x18 set/clear LEDs from bitmask
+                elif regAddress in [0x10, 0x11, 0x12, 0x13, 0x14, 0x18]:
+                    if dataLen != 1:
+                        print_param_count_err(regAddress, 1, dataLen)
                         continue
-                led_f = { 0x10:self.leds.user, 0x11:self.leds.golioth,
-                        0x12:self.leds.internet, 0x13:self.leds.battery,
-                        0x14:self.leds.power, 0x18:self.leds.process_bitmask  }
+                    led_f = { 0x10:self.leds.user, 0x11:self.leds.golioth,
+                            0x12:self.leds.internet, 0x13:self.leds.battery,
+                            0x14:self.leds.power, 0x18:self.leds.process_bitmask  }
 
-                print("Updating LED: ", regAddress, misc_byte[0])
-                led_f[regAddress](misc_byte[0])
-                continue
+                    print("Updating LED: ", regAddress, data[dataStart])
+                    led_f[regAddress](data[dataStart])
+                    continue
 
-            # Addr 0x20..0x25: store string in memory
-            elif regAddress in [0x20, 0x21, 0x22, 0x23, 0x24, 0x25]:
-                # Handle the controller read/write request.
-                if i2c.have_recv_req():
-                    try:
-                        data_addr = regAddress & 0xF
-                        self.clear_str_memory(data_addr)
-                        i2c.recv(self.str_data[data_addr], timeout=1000)
+                # Addr 0x26: store string in memory
+                elif regAddress == 0x26:
+                    if dataLen == 0:
+                        print_param_count_err(regAddress, ">0", dataLen)
+                        continue
 
-                    except OSError:
-                        print("Timeout receiving string (assuming this is the end of the string)")
-                        pass
-
-                    self.display.font("serif")
-                    self.display.thickness(2)
-                    self.write_string(data_addr)
-                continue
-
-            # Addr 0x26: store string in memory
-            elif regAddressBuff[0] == 0x26:
-                # Handle the controller read/write request.
-                if i2c.have_recv_req():
-                    try:
-                        immediate = bytearray(8)
-                        i2c.recv(immediate)
-
-                    except OSError:
-                        print("Timeout receiving string (assuming this is the end of the string)")
-
-                    print(immediate)
-
-                    for c in immediate:
+                    for c in data[dataStart:dataStart+dataLen]:
                         if c == 0x00:
-                            # assume null terminator is a the end of the string
+                            # assume null terminator is at the end of the string
                             break
                         elif c < 0x20 or c > 0x7E:
                             self.text_buffer += ' '
@@ -281,26 +191,17 @@ class ostentus:
                             self.text_buffer += chr(c)
                     print("Added to text_buffer:")
                     print("\t", self.text_buffer)
+                    continue
 
-                continue
+                else:
+                    # Clear receive bytes so they don't get reprocessed as a regAddress
+                    print("Ignoring command on regAddress: ", regAddress)
 
-            else:
-                # Clear receive bytes so they don't get reprocessed as a regAddress
-                print("Ignoring command on regAddress: ", regAddress)
-                if i2c.have_recv_req():
-                    try:
-                        null_buffer = bytearray(128)
-                        i2c.recv(null_buffer, timeout=1000)
-                        del null_buffer
-                        continue
-
-                    except OSError:
-                        continue
-
+'''
 def main():
     o = ostentus()
     o.listen()
 
 if __name__ == "__main__":
     main()
-
+'''

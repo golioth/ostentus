@@ -50,7 +50,7 @@ this process.
 export BADGER_COMPILE_DIR=/home/mike/golioth-compile/badger
 
 mkdir $BADGER_COMPILE_DIR
-export OSTENTUS_VERSION=szczys/hardware_bringup
+export OSTENTUS_VERSION=v0.0.1
 export PIMORONI_PICO_VERSION=szczys/ostentus_v1.19.10
 export MICROPYTHON_VERSION=9dfabcd6d3d080aced888e8474e921f11dc979bb
 export BOARD_TYPE=PIMORONI_BADGER2040
@@ -81,7 +81,6 @@ make BOARD=PIMORONI_BADGER2040 submodules
 cmake -S . -B build-$BOARD_TYPE -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=$BADGER_COMPILE_DIR/pimoroni-pico/micropython/modules/badger2040-micropython.cmake -DMICROPY_BOARD=$BOARD_TYPE -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
 ## Copy ostentus files into the modules directory
-cp $BADGER_COMPILE_DIR/ostentus/boot.py $BADGER_COMPILE_DIR/micropython/ports/rp2/modules/.
 cp $BADGER_COMPILE_DIR/ostentus/ostentus.py $BADGER_COMPILE_DIR/micropython/ports/rp2/modules/.
 cp $BADGER_COMPILE_DIR/ostentus/ostentus_leds.py $BADGER_COMPILE_DIR/micropython/ports/rp2/modules/.
 cp $BADGER_COMPILE_DIR/ostentus/splashscreen_rd.py $BADGER_COMPILE_DIR/micropython/ports/rp2/modules/.

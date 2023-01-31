@@ -3,8 +3,11 @@ import badger2040
 import splashscreen_rd
 from ostentus_leds import o_leds
 
+
+
 class ostentus:
     def __init__(self, bus=0, sclPin=5, sdaPin=4, address=0x12):
+        #FIXME: Add pins and address to initialization
         self.bus = bus
         self.sclPin = sclPin
         self.sdaPin = sdaPin
@@ -58,7 +61,7 @@ class ostentus:
         print("outstring:",outstring)
         self.display.text(outstring, self.x_loc, 10+(22*line_idx), 0.7)
 
-    def print_param_count_err(cmd, expected_cnt, actual_cnt):
+    def print_param_count_err(self, cmd, expected_cnt, actual_cnt):
         print("Error: cmd {} expects data length {} but got {}".format(cmd, expected_cnt, actual_cnt))
 
     def init(self):
@@ -95,7 +98,7 @@ class ostentus:
                 # Addr 0x02..0x03: change x_loc or y_loc offsets
                 elif regAddress in [0x02, 0x03]:
                     if dataLen != 1:
-                        print_param_count_err(regAddress, 1, dataLen)
+                        self.print_param_count_err(regAddress, 1, dataLen)
                         continue
                     if regAddress == 0x02:
                         if 0x00 <= data[dataStart] < badger2040.WIDTH:
@@ -118,7 +121,7 @@ class ostentus:
                 # Addr 0x05: change the pen thickness
                 elif regAddress == 0x05:
                     if dataLen != 1:
-                        print_param_count_err(regAddress, 1, dataLen)
+                        self.print_param_count_err(regAddress, 1, dataLen)
                         continue
                     self.display.thickness(data[dataStart])
                     print("Changing pen thickness to: ", data[dataStart])
@@ -127,7 +130,7 @@ class ostentus:
                 # Addr 0x06: change the font
                 elif regAddress == 0x06:
                     if dataLen != 1:
-                        print_param_count_err(regAddress, 1, dataLen)
+                        self.print_param_count_err(regAddress, 1, dataLen)
                         continue
                     fonts = ["sans", "gothic" "cursive" "serif" "serif_italic"]
                     self.display.font(fonts[data[dataStart]])
@@ -137,7 +140,7 @@ class ostentus:
                 # Addr 0x07: write the stored text to display memory
                 elif regAddress == 0x07:
                     if dataLen != 3:
-                        print_param_count_err(regAddress, 3, dataLen)
+                        self.print_param_count_err(regAddress, 3, dataLen)
                         continue
                     print("Writing stored text to screen. x={} y={} scale={}".format(data[dataStart], data[dataStart+1], data[dataStart+2]/10))
                     self.display.text(self.text_buffer, data[dataStart], data[dataStart+1], data[dataStart+2]/10)
@@ -152,7 +155,7 @@ class ostentus:
                 # Addr 0x09: clear a rectangle bounded by x, y, w, h
                 elif regAddress == 0x09:
                     if dataLen != 4:
-                        print_param_count_err(regAddress, 4, dataLen)
+                        self.print_param_count_err(regAddress, 4, dataLen)
                         continue
                     print("Clearing rectangle")
                     self.display.pen(0)
@@ -165,7 +168,7 @@ class ostentus:
                 # Addr 0x18 set/clear LEDs from bitmask
                 elif regAddress in [0x10, 0x11, 0x12, 0x13, 0x14, 0x18]:
                     if dataLen != 1:
-                        print_param_count_err(regAddress, 1, dataLen)
+                        self.print_param_count_err(regAddress, 1, dataLen)
                         continue
                     led_f = { 0x10:self.leds.user, 0x11:self.leds.golioth,
                             0x12:self.leds.internet, 0x13:self.leds.battery,
@@ -178,7 +181,7 @@ class ostentus:
                 # Addr 0x26: store string in memory
                 elif regAddress == 0x26:
                     if dataLen == 0:
-                        print_param_count_err(regAddress, ">0", dataLen)
+                        self.print_param_count_err(regAddress, ">0", dataLen)
                         continue
 
                     for c in data[dataStart:dataStart+dataLen]:

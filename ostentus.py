@@ -19,8 +19,8 @@ class ostentus:
         self.x_loc = 0
         self.y_loc = 0
 
+        self.init()
         self.leds = o_leds()
-        self.leds.boot_animation()
 
     def clear_all_memory(self, clear_display=False):
         self.str_data = [bytearray(b'\x00'*32)]*6

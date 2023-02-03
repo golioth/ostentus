@@ -1,4 +1,4 @@
-import "ostentus.h"
+#include "ostentus.h"
 
 /* Add ostentus.c to the CMakeLists.txt */
 
@@ -30,6 +30,7 @@ int main(void) {
 
 		/* Write number "##.#" to framebuffer */
 		clear_rectangle(0, 100, 200, 80); // Clear last number from framebuffer
+		clear_text_buffer();
 		snprintk(msg, 5, "%d.%d", whole, decimal);
 		store_text(msg, strlen(msg)); // Write message to data buffer
 		write_text(12, 140, 26); // Write data buffer text at x=3, y=60 scale=1.0
@@ -39,6 +40,6 @@ int main(void) {
 			decimal = 0;
 			++whole;
 		}
-		k_sleep(K_SECONDS(2));
+		k_sleep(K_SECONDS(5));
 	}
 }

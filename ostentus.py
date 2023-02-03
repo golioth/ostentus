@@ -73,7 +73,7 @@ class ostentus:
         while True:
             if ostentus_i2c.has_data():
 
-                data = ostentus_i2c.my_function()
+                data = ostentus_i2c.pop()
                 if len(data) < 2:
                     continue
                 regAddress = data[0]

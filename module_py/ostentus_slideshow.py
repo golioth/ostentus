@@ -1,5 +1,7 @@
 import machine
 import badger2040
+from micropython import const
+import cap_touch as touch
 
 _label_y = 50
 _value_y = 130
@@ -9,6 +11,10 @@ d=badger2040.Badger2040()
 _pages = list()
 _page_tracker = 0
 _slideshow_tim = machine.Timer()
+
+_button_left = const(0x01)
+_button_right = const(0x04)
+_button_both = const(_button_left | _button_right)
 
 class slide_page:
     def __init__(self, s_id, label):
@@ -48,11 +54,16 @@ def start(delay_ms):
     if len(_pages) < 1:
         return
     if (delay_ms < 6000):
-        delay_ms = 6000
-    _slideshow_tim.init(mode=machine.Timer.PERIODIC, period=delay_ms, callback=show_page)
-    show_page(None)
+        delay_ms = 30000
+    _slideshow_tim.init(mode=machine.Timer.PERIODIC, period=delay_ms,
+            callback=inc_and_show)
+    touch.register_callback_left(inc_and_show)
+    touch.register_callback_right(dec_and_show)
+    touch.start()
+    show_page()
 
 def stop():
+    touch.stop()
     _slideshow_tim.deinit()
 
 def show_label(label):
@@ -63,7 +74,28 @@ def show_label(label):
     d.pen(15)
     d.text(label, 0, _label_y, scale)
 
-def show_page(t):
+
+def page_tracker_inc():
+    global _page_tracker, _pages
+    _page_tracker += 1
+    if _page_tracker >= len(_pages):
+        _page_tracker = 0
+
+def page_tracker_dec():
+    global _page_tracker, _pages
+    _page_tracker -= 1
+    if _page_tracker < 0:
+        _page_tracker = len(_pages)-1
+
+def dec_and_show(t=None):
+    page_tracker_inc()
+    show_page()
+
+def inc_and_show(t=None):
+    page_tracker_inc()
+    show_page()
+
+def show_page():
     global _pages
     global _page_tracker
     if len(_pages) < 1:
@@ -73,9 +105,6 @@ def show_page(t):
     d.clear()
     show_label(p.label)
     fit_text(p.value)
-    _page_tracker += 1
-    if _page_tracker >= len(_pages):
-        _page_tracker = 0
     d.update()
 
 def fit_text(text):

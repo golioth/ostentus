@@ -4,7 +4,6 @@ import splashscreen_rd
 from ostentus_leds import o_leds
 import ostentus_slideshow as slideshow
 
-
 class ostentus:
     def __init__(self, bus=0, sclPin=5, sdaPin=4, address=0x12):
         #FIXME: Add pins and address to initialization
@@ -202,7 +201,7 @@ class ostentus:
                         continue
                     if data[dataStart]:
                         print("Starting slideshow")
-                        slideshow.start(6000)
+                        slideshow.start(0)
                     else:
                         print("Ending slideshow")
                         slideshow.stop()

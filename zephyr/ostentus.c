@@ -5,8 +5,7 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 #include <zephyr/device.h>
 #include <string.h>
 
-#define CMD_ADDR 0x12
-#define DAT_ADDR 0x13
+#define OSTENTUS_ADDR 0x12
 
 #define OSTENTUS_CLEAR_MEM 0x00
 #define OSTENTUS_REFRESH 0x01
@@ -35,72 +34,62 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(click_i2c));
 
 #define BUF_SIZE 48
-uint8_t _ostentus_data_buf[BUF_SIZE];
+uint8_t _ostentus_buf[BUF_SIZE];
 
-int send_ostentus_cmd(uint8_t cmd) {
-	int ret = i2c_write(i2c_dev, &cmd, 1, CMD_ADDR);
-	return ret;
-}
-
-int send_ostentus_data_buf(uint8_t len) {
-	int ret = i2c_write(i2c_dev, _ostentus_data_buf, len, DAT_ADDR);
-	return ret;
+int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
+	_ostentus_buf[0] = reg;
+	LOG_HEXDUMP_DBG(_ostentus_buf, data_len+1, "sending packet");
+	return i2c_write(i2c_dev, _ostentus_buf, data_len+1, OSTENTUS_ADDR);
 }
 
 int clear_memory(void) {
-	return send_ostentus_cmd(OSTENTUS_CLEAR_MEM);
+	return ostentus_i2c_write(OSTENTUS_CLEAR_MEM, 0);
 }
 
 int show_splash(void) {
-	return send_ostentus_cmd(OSTENTUS_SPLASHSCREEN);
+	return ostentus_i2c_write(OSTENTUS_SPLASHSCREEN, 0);
 }
 
 int update_display(void) {
-	return send_ostentus_cmd(OSTENTUS_REFRESH);
+	return ostentus_i2c_write(OSTENTUS_REFRESH, 0);
 }
 
 int update_thickness(uint8_t thickness) {
-	_ostentus_data_buf[0] = thickness;
-	send_ostentus_data_buf(1);
-	return send_ostentus_cmd(OSTENTUS_THICKNESS);
+	_ostentus_buf[1] = thickness;
+	return ostentus_i2c_write(OSTENTUS_THICKNESS, 1);
 }
 
 int update_font(uint8_t font) {
-	_ostentus_data_buf[0] = font;
-	send_ostentus_data_buf(1);
-	return send_ostentus_cmd(OSTENTUS_FONT);
+	_ostentus_buf[1] = font;
+	return ostentus_i2c_write(OSTENTUS_FONT, 1);
 }
 
 int clear_text_buffer(void) {
-	return send_ostentus_cmd(OSTENTUS_CLEAR_TEXT);
+	return ostentus_i2c_write(OSTENTUS_CLEAR_TEXT, 0);
 }
 
 int clear_rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
-	_ostentus_data_buf[0] = x;
-	_ostentus_data_buf[1] = y;
-	_ostentus_data_buf[2] = w;
-	_ostentus_data_buf[3] = h;
-	send_ostentus_data_buf(4);
-	return send_ostentus_cmd(OSTENTUS_CLEAR_RECT);
+	_ostentus_buf[1] = x;
+	_ostentus_buf[2] = y;
+	_ostentus_buf[3] = w;
+	_ostentus_buf[4] = h;
+	return ostentus_i2c_write(OSTENTUS_CLEAR_RECT, 4);
 }
 
 int led_bitmask(uint8_t bitmask) {
-	_ostentus_data_buf[0] = bitmask;
-	send_ostentus_data_buf(1);
-	return send_ostentus_cmd(OSTENTUS_LED_BITMASK);
+	_ostentus_buf[1] = bitmask;
+	return ostentus_i2c_write(OSTENTUS_LED_BITMASK, 1);
 }
 
 int store_text(char *str, uint8_t len) {
-	memcpy(_ostentus_data_buf, str, len);
-	send_ostentus_data_buf(len);
-	return send_ostentus_cmd(OSTENTUS_STORE_TEXT);
+	memcpy(_ostentus_buf+1, str, len);
+	return ostentus_i2c_write(OSTENTUS_STORE_TEXT, len);
 	return 0;
 }
 
 int write_text(uint8_t x, uint8_t y, uint8_t thickness) {
-	_ostentus_data_buf[0] = x;
-	_ostentus_data_buf[1] = y;
-	_ostentus_data_buf[2] = thickness;
-	send_ostentus_data_buf(3);
-	return send_ostentus_cmd(OSTENTUS_WRITE_TEXT);
+	_ostentus_buf[1] = x;
+	_ostentus_buf[2] = y;
+	_ostentus_buf[3] = thickness;
+	return ostentus_i2c_write(OSTENTUS_WRITE_TEXT, 3);
 }

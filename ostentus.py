@@ -2,7 +2,7 @@ import ostentus_i2c
 import badger2040
 import splashscreen_rd
 from ostentus_leds import o_leds
-
+import ostentus_slideshow as slideshow
 
 
 class ostentus:
@@ -91,6 +91,7 @@ class ostentus:
 
                 # Addr 0x01: refresh display
                 elif regAddress == 0x01:
+                    slideshow.stop()
                     self.display.update_speed(0)
                     self.display.update()
                     continue
@@ -114,6 +115,7 @@ class ostentus:
 
                 # Addr 0x04: show Golioth splashscreen
                 elif regAddress == 0x04:
+                    slideshow.stop()
                     self.show_splash()
                     print("Showing splashscreen")
                     continue
@@ -123,6 +125,7 @@ class ostentus:
                     if dataLen != 1:
                         self.print_param_count_err(regAddress, 1, dataLen)
                         continue
+                    slideshow.stop()
                     self.display.thickness(data[dataStart])
                     print("Changing pen thickness to: ", data[dataStart])
                     continue
@@ -132,6 +135,7 @@ class ostentus:
                     if dataLen != 1:
                         self.print_param_count_err(regAddress, 1, dataLen)
                         continue
+                    slideshow.stop()
                     fonts = ["sans", "gothic" "cursive" "serif" "serif_italic"]
                     self.display.font(fonts[data[dataStart]])
                     print("Updating font to: ", data[dataStart])
@@ -143,6 +147,7 @@ class ostentus:
                         self.print_param_count_err(regAddress, 3, dataLen)
                         continue
                     print("Writing stored text to screen. x={} y={} scale={}".format(data[dataStart], data[dataStart+1], data[dataStart+2]/10))
+                    slideshow.stop()
                     self.display.text(self.text_buffer, data[dataStart], data[dataStart+1], data[dataStart+2]/10)
                     continue
 
@@ -158,11 +163,46 @@ class ostentus:
                         self.print_param_count_err(regAddress, 4, dataLen)
                         continue
                     print("Clearing rectangle")
+                    slideshow.stop()
                     self.display.pen(0)
                     self.display.rectangle(data[dataStart], data[dataStart+1], data[dataStart+2], data[dataStart+3])
                     self.display.pen(15)
                     continue
 
+                # Addr 0x0A: Register a slideshow entry
+                elif regAddress == 0x0A:
+                    if dataLen < 2:
+                        self.print_param_count_err(regAddress, 2, dataLen)
+                        continue
+                    slideshow_id = data[dataStart]
+                    slideshow_label = data[dataStart+1:dataStart+dataLen]
+                    print("Adding new slideshow page:", slideshow_id, slideshow_label)
+                    slideshow.add(slideshow_id, slideshow_label)
+                    continue
+
+                # Addr 0x0B: Update the values of slideshow entries by id
+                elif regAddress == 0x0B:
+                    if dataLen < 2:
+                        self.print_param_count_err(regAddress, 2, dataLen)
+                        continue
+                    slideshow_id = data[dataStart]
+                    slideshow_value = data[dataStart+1:dataStart+dataLen]
+                    print("Set value using id:", slideshow_id, slideshow_value)
+                    slideshow.set_value_by_id(slideshow_id, slideshow_value)
+                    continue
+
+                # Addr 0x0C: Start/stop slideshow
+                elif regAddress == 0x0C:
+                    if dataLen != 1:
+                        self.print_param_count_err(regAddress, 1, dataLen)
+                        continue
+                    if data[dataStart]:
+                        print("Starting slideshow")
+                        slideshow.start(6000)
+                    else:
+                        print("Ending slideshow")
+                        slideshow.stop()
+                    continue
 
                 # Addr 0x10..0x14: set/clear LEDs
                 # Addr 0x18 set/clear LEDs from bitmask

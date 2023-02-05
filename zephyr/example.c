@@ -7,39 +7,68 @@
  * Ostentus board.
  */
 int main(void) {
+	char msg[32];
+	/* Update Ostentus LEDS using bitmask */
+	led_bitmask(0x1F);
+
+	/* Show Golioth Logo */
 	show_splash();
+
+	k_sleep(K_MSEC(2000));
 	clear_memory();
 
-	/* Write "Temperature" to framebuffer */
+	/* Update Ostentus LEDS so only Power is on using bitmask */
+	led_bitmask(0x10);
+
+	/* Write some text to the screen */
 	update_thickness(3); // Set pen thickness
 	update_font(0); // Choose sans font
-	char msg[] = "Temperature";
+	snprintk(msg, sizeof(msg), "%s", "Manually");
 	store_text(msg, strlen(msg)); // Write message to data buffer
 	write_text(3, 60, 10); // Write data buffer text at x=3, y=60 scale=1.0
 
-	update_thickness(8); // Set pen thickness
-	uint8_t mask = 1;
+	snprintk(msg, sizeof(msg), "%s", "Show");
+	clear_text_buffer();
+	store_text(msg, strlen(msg)); // Write message to data buffer
+	write_text(3, 120, 17); // Write data buffer text at x=3, y=120 scale=1.7
+
+	snprintk(msg, sizeof(msg), "%s", "Some Text");
+	clear_text_buffer();
+	store_text(msg, strlen(msg)); // Write message to data buffer
+	write_text(3, 180, 10); // Write data buffer text at x=3, y=180 scale=1.0
+
+	update_display();
+	k_sleep(K_MSEC(3000));
+
+	/* Write differnt text over what was just written */
+	clear_rectangle(0, 100, 200, 40); // Clear last number from framebuffer
+	snprintk(msg, sizeof(msg), "%s", "Rewrite");
+	clear_text_buffer();
+	store_text(msg, strlen(msg)); // Write message to data buffer
+	write_text(3, 120, 17); // Write data buffer text at x=3, y=120 scale=1.7
+
+	update_display();
+	k_sleep(K_MSEC(3000));
+
+	/* Set up sensor display slides for slideshow */
+	slide_add(1, "Temperature", 12);
+	slide_add(2, "Pressure", 9);
+	slideshow(1);
+
+	/* Simulated values */
 	uint8_t whole = 26;
 	uint8_t decimal = 0;
 	while(1) {
-		led_bitmask(mask); // Update Ostentus LEDS using bitmask
-		mask = mask<<1;
-		if (mask > 1<<4) {
-			mask = 1;
-		}
+		/* Write number "##.#" to slide id=1 */
+		snprintk(msg, 6, "%d.%d", whole, decimal);
+		slide_set(1, msg, strlen(msg));
 
-		/* Write number "##.#" to framebuffer */
-		clear_rectangle(0, 100, 200, 80); // Clear last number from framebuffer
-		clear_text_buffer();
-		snprintk(msg, 5, "%d.%d", whole, decimal);
-		store_text(msg, strlen(msg)); // Write message to data buffer
-		write_text(12, 140, 26); // Write data buffer text at x=3, y=60 scale=1.0
-		update_display(); // Write framebuffer to epaper and refresh the display
+		/* Increment the simulated sensor value */
 		++decimal;
 		if (decimal > 9) {
 			decimal = 0;
 			++whole;
 		}
-		k_sleep(K_SECONDS(5));
+		k_sleep(K_SECONDS(1));
 	}
 }

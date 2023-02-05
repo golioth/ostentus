@@ -17,6 +17,9 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 #define OSTENTUS_WRITE_TEXT 0x07
 #define OSTENTUS_CLEAR_TEXT 0x08
 #define OSTENTUS_CLEAR_RECT 0x09
+#define OSTENTUS_SLIDE_ADD 0x0A
+#define OSTENTUS_SLIDE_SET 0x0B
+#define OSTENTUS_SLIDESHOW 0x0C
 #define OSTENTUS_LED_USE 0x10
 #define OSTENTUS_LED_GOL 0x11
 #define OSTENTUS_LED_INT 0x12
@@ -76,6 +79,23 @@ int clear_rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
 	return ostentus_i2c_write(OSTENTUS_CLEAR_RECT, 4);
 }
 
+int slide_add(uint8_t id, char *str, uint8_t len) {
+	_ostentus_buf[1] = id;
+	memcpy(_ostentus_buf+2, str, len);
+	return ostentus_i2c_write(OSTENTUS_SLIDE_ADD, len+1);
+}
+
+int slide_set(uint8_t id, char *str, uint8_t len) {
+	_ostentus_buf[1] = id;
+	memcpy(_ostentus_buf+2, str, len);
+	return ostentus_i2c_write(OSTENTUS_SLIDE_SET, len+1);
+}
+
+int slideshow(uint8_t setting) {
+	_ostentus_buf[1] = setting;
+	return ostentus_i2c_write(OSTENTUS_SLIDESHOW, 1);
+}
+
 int led_bitmask(uint8_t bitmask) {
 	_ostentus_buf[1] = bitmask;
 	return ostentus_i2c_write(OSTENTUS_LED_BITMASK, 1);
@@ -84,7 +104,6 @@ int led_bitmask(uint8_t bitmask) {
 int store_text(char *str, uint8_t len) {
 	memcpy(_ostentus_buf+1, str, len);
 	return ostentus_i2c_write(OSTENTUS_STORE_TEXT, len);
-	return 0;
 }
 
 int write_text(uint8_t x, uint8_t y, uint8_t thickness) {

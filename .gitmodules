@@ -1,0 +1,8 @@
+[submodule "submodules/pimoroni-pico"]
+	path = submodules/pimoroni-pico
+	url = git@github.com:pimoroni/pimoroni-pico.git
+	ignore = dirty
+[submodule "submodules/micropython"]
+	path = submodules/micropython
+	url = git@github.com:micropython/micropython.git
+	ignore = dirty

@@ -1,0 +1,864 @@
+diff --git a/drivers/uc8151_legacy/uc8151_legacy.cpp b/drivers/uc8151_legacy/uc8151_legacy.cpp
+index 10e9431c..5e57b4af 100644
+--- a/drivers/uc8151_legacy/uc8151_legacy.cpp
++++ b/drivers/uc8151_legacy/uc8151_legacy.cpp
+@@ -49,10 +49,11 @@ namespace pimoroni {
+   };
+ 
+   bool UC8151_Legacy::is_busy() {
+-    return !gpio_get(BUSY);
++    return gpio_get(BUSY);
+   }
+ 
+   void UC8151_Legacy::busy_wait() {
++    return;
+     while(is_busy()) {
+       tight_loop_contents();
+     }
+@@ -64,237 +65,6 @@ namespace pimoroni {
+     busy_wait();
+   }
+ 
+-  void UC8151_Legacy::default_luts() {
+-    command(LUT_VCOM, {
+-      0x00, 0x64, 0x64, 0x37, 0x00, 0x01,
+-      0x00, 0x8c, 0x8c, 0x00, 0x00, 0x04,
+-      0x00, 0x64, 0x64, 0x37, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00
+-    });
+-
+-    command(LUT_WW, {
+-      0x54, 0x64, 0x64, 0x37, 0x00, 0x01,
+-      0x60, 0x8c, 0x8c, 0x00, 0x00, 0x04,
+-      0xa8, 0x64, 0x64, 0x37, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_BW, {
+-      0x54, 0x64, 0x64, 0x37, 0x00, 0x01,
+-      0x60, 0x8c, 0x8c, 0x00, 0x00, 0x04,
+-      0xa8, 0x64, 0x64, 0x37, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_WB, {
+-      0xa8, 0x64, 0x64, 0x37, 0x00, 0x01,
+-      0x60, 0x8c, 0x8c, 0x00, 0x00, 0x04,
+-      0x54, 0x64, 0x64, 0x37, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_BB, {
+-      0xa8, 0x64, 0x64, 0x37, 0x00, 0x01,
+-      0x60, 0x8c, 0x8c, 0x00, 0x00, 0x04,
+-      0x54, 0x64, 0x64, 0x37, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    busy_wait();
+-  }
+-
+-  void UC8151_Legacy::medium_luts() {
+-
+-    command(LUT_VCOM, {
+-      0x00, 0x16, 0x16, 0x0d, 0x00, 0x01,
+-      0x00, 0x23, 0x23, 0x00, 0x00, 0x02,
+-      0x00, 0x16, 0x16, 0x0d, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00
+-    });
+-
+-    command(LUT_WW, {
+-      0x54, 0x16, 0x16, 0x0d, 0x00, 0x01,
+-      0x60, 0x23, 0x23, 0x00, 0x00, 0x02,
+-      0xa8, 0x16, 0x16, 0x0d, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_BW, {
+-      0x54, 0x16, 0x16, 0x0d, 0x00, 0x01,
+-      0x60, 0x23, 0x23, 0x00, 0x00, 0x02,
+-      0xa8, 0x16, 0x16, 0x0d, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_WB, {
+-      0xa8, 0x16, 0x16, 0x0d, 0x00, 0x01,
+-      0x60, 0x23, 0x23, 0x00, 0x00, 0x02,
+-      0x54, 0x16, 0x16, 0x0d, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_BB, {
+-      0xa8, 0x16, 0x16, 0x0d, 0x00, 0x01,
+-      0x60, 0x23, 0x23, 0x00, 0x00, 0x02,
+-      0x54, 0x16, 0x16, 0x0d, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    busy_wait();
+-  }
+-
+-  void UC8151_Legacy::fast_luts() {
+-    // 0x3c, 0x00, 0x2b, 0x2b, 0x24, 0x1a, ????
+-    command(LUT_VCOM, {
+-      0x00, 0x04, 0x04, 0x07, 0x00, 0x01,
+-      0x00, 0x0c, 0x0c, 0x00, 0x00, 0x02,
+-      0x00, 0x04, 0x04, 0x07, 0x00, 0x02,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00
+-    });
+-
+-    command(LUT_WW, {
+-      0x54, 0x04, 0x04, 0x07, 0x00, 0x01,
+-      0x60, 0x0c, 0x0c, 0x00, 0x00, 0x02,
+-      0xa8, 0x04, 0x04, 0x07, 0x00, 0x02,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_BW, {
+-      0x54, 0x04, 0x04, 0x07, 0x00, 0x01,
+-      0x60, 0x0c, 0x0c, 0x00, 0x00, 0x02,
+-      0xa8, 0x04, 0x04, 0x07, 0x00, 0x02,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_WB, {
+-      0xa8, 0x04, 0x04, 0x07, 0x00, 0x01,
+-      0x60, 0x0c, 0x0c, 0x00, 0x00, 0x02,
+-      0x54, 0x04, 0x04, 0x07, 0x00, 0x02,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_BB, {
+-      0xa8, 0x04, 0x04, 0x07, 0x00, 0x01,
+-      0x60, 0x0c, 0x0c, 0x00, 0x00, 0x02,
+-      0x54, 0x04, 0x04, 0x07, 0x00, 0x02,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(PLL, {
+-      HZ_200
+-    });
+-
+-    busy_wait();
+-  }
+-
+-  void UC8151_Legacy::turbo_luts() {
+-    // 0x3c, 0x00, 0x2b, 0x2b, 0x24, 0x1a, ????
+-    command(LUT_VCOM, {
+-      0x00, 0x01, 0x01, 0x02, 0x00, 0x01,
+-      0x00, 0x02, 0x02, 0x00, 0x00, 0x02,
+-      0x00, 0x02, 0x02, 0x03, 0x00, 0x02,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00
+-    });
+-
+-    command(LUT_WW, {
+-      0x54, 0x01, 0x01, 0x02, 0x00, 0x01,
+-      0x60, 0x02, 0x02, 0x00, 0x00, 0x02,
+-      0xa8, 0x02, 0x02, 0x03, 0x00, 0x02,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_BW, {
+-      0x54, 0x01, 0x01, 0x02, 0x00, 0x01,
+-      0x60, 0x02, 0x02, 0x00, 0x00, 0x02,
+-      0xa8, 0x02, 0x02, 0x03, 0x00, 0x02,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_WB, {
+-      0xa8, 0x01, 0x01, 0x02, 0x00, 0x01,
+-      0x60, 0x02, 0x02, 0x00, 0x00, 0x02,
+-      0x54, 0x02, 0x02, 0x03, 0x00, 0x02,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(LUT_BB, {
+-      0xa8, 0x01, 0x01, 0x02, 0x00, 0x01,
+-      0x60, 0x02, 0x02, 0x00, 0x00, 0x02,
+-      0x54, 0x02, 0x02, 0x03, 0x00, 0x02,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-    });
+-
+-    command(PLL, {
+-      HZ_200
+-    });
+-
+-    busy_wait();
+-  }
+-
+   void UC8151_Legacy::init() {
+     // configure spi interface and pins
+     spi_init(spi, 12'000'000);
+@@ -312,7 +82,7 @@ namespace pimoroni {
+ 
+     gpio_set_function(BUSY, GPIO_FUNC_SIO);
+     gpio_set_dir(BUSY, GPIO_IN);
+-    gpio_set_pulls(BUSY, true, false);
++    gpio_set_pulls(BUSY, false, true);
+ 
+     gpio_set_function(SCK,  GPIO_FUNC_SPI);
+     gpio_set_function(MOSI, GPIO_FUNC_SPI);
+@@ -323,74 +93,89 @@ namespace pimoroni {
+   void UC8151_Legacy::setup(uint8_t speed) {
+     reset();
+ 
+-    _update_speed = speed;
+-
+-    if(speed == 0) {
+-      command(PSR, {
+-        RES_128x296 | LUT_OTP | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
+-      });
+-    } else {
+-      command(PSR, {
+-        RES_128x296 | LUT_REG | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
+-      });
+-    }
+-    switch(speed) {
+-      case 0:
+-        // Note: the defult luts are built in so we don't really need to flash them here
+-        // they are preserved above for posterity and reference mostly.
+-        break;
+-      case 1:
+-        medium_luts();
+-        break;
+-      case 2:
+-        fast_luts();
+-        break;
+-      case 3:
+-        turbo_luts();
+-        break;
+-      default:
+-        break;
+-    }
+-
+-    command(PWR, {
+-      VDS_INTERNAL | VDG_INTERNAL,
+-      VCOM_VD | VGHL_16V,
+-      0b101011,
+-      0b101011,
+-      0b101011
+-    });
+-
+-    command(PON); // power on
+     busy_wait();
+-
+-    // booster soft start configuration
+-    command(BTST, {
+-      START_10MS | STRENGTH_3 | OFF_6_58US,
+-      START_10MS | STRENGTH_3 | OFF_6_58US,
+-      START_10MS | STRENGTH_3 | OFF_6_58US
+-    });
+-
+-    command(PFS, {
+-      FRAMES_1
+-    });
+-
+-    command(TSE, {
+-      TEMP_INTERNAL | OFFSET_0
+-    });
+-
+-    command(TCON, {0x22}); // tcon setting
+-    command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
+-
+-    command(PLL, {
+-      HZ_100
+-    });
+-
+-    command(POF);
++    command(0x12);  //SWRESET
++    busy_wait();
++    sleep_ms(100);
++
++    command(0x01, {0xC7, 0x00, 0x00}); //Driver output control
++    command(0x11, {0x01}); //data entry mode
++    command(0x44, {0x00, 0x18}); //set Ram-X address start/end position
++    command(0x45, {0xC7, 0x00, 0x00, 0x00}); //set Ram-Y address start/end position
++    command(0x3C, {0x05}); //BorderWavefrom
++    command(0x18, {0x80}); //Reading temperature sensor
++    command(0x4E, {0x00});   // set RAM x address count to 0;
++    command(0x4F, {0xC7, 0x00});   // set RAM y address count to 0X199;
+     busy_wait();
++
++//     _update_speed = speed;
++// 
++//     if(speed == 0) {
++//       command(PSR, {
++//         RES_128x296 | LUT_OTP | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
++//       });
++//     } else {
++//       command(PSR, {
++//         RES_128x296 | LUT_REG | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
++//       });
++//     }
++//     switch(speed) {
++//       case 0:
++// Note: the defult luts are built in so we don't really need to flash them here
++// they are preserved above for posterity and reference mostly.
++//         break;
++//       case 1:
++//         medium_luts();
++//         break;
++//       case 2:
++//         fast_luts();
++//         break;
++//       case 3:
++//         turbo_luts();
++//         break;
++//       default:
++//         break;
++//     }
++// 
++//     command(PWR, {
++//       VDS_INTERNAL | VDG_INTERNAL,
++//       VCOM_VD | VGHL_16V,
++//       0b101011,
++//       0b101011,
++//       0b101011
++//     });
++// 
++//     command(PON); // power on
++//     busy_wait();
++// 
++// booster soft start configuration
++//     command(BTST, {
++//       START_10MS | STRENGTH_3 | OFF_6_58US,
++//       START_10MS | STRENGTH_3 | OFF_6_58US,
++//       START_10MS | STRENGTH_3 | OFF_6_58US
++//     });
++// 
++//     command(PFS, {
++//       FRAMES_1
++//     });
++// 
++//     command(TSE, {
++//       TEMP_INTERNAL | OFFSET_0
++//     });
++// 
++//     command(TCON, {0x22}); // tcon setting
++//     command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
++// 
++//     command(PLL, {
++//       HZ_100
++//     });
++// 
++//     command(POF);
++//     busy_wait();
+   }
+ 
+   void UC8151_Legacy::power_off() {
+-    command(POF);
++    //command(POF);
+   }
+ 
+   void UC8151_Legacy::read(uint8_t reg, size_t len, uint8_t *data) {
+@@ -466,12 +251,12 @@ namespace pimoroni {
+   }
+ 
+   void UC8151_Legacy::invert(bool inv) {
+-    inverted = inv;
+-    command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
++//     inverted = inv;
++//     command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
+   }
+ 
+   void UC8151_Legacy::update_speed(uint8_t speed) {
+-    setup(speed);
++//     setup(speed);
+   }
+ 
+   uint8_t UC8151_Legacy::update_speed() {
+@@ -496,73 +281,82 @@ namespace pimoroni {
+   void UC8151_Legacy::partial_update(int x, int y, int w, int h, bool blocking) {
+     // y is given in columns ("banks"), which are groups of 8 horiontal pixels
+     // x is given in pixels
+-    if(blocking) {
+-      busy_wait();
+-    }
+-
+-    int cols = h / 8;
+-    int y1 = y / 8;
+-    //int y2 = y1 + cols;
+-
+-    int rows = w;
+-    int x1 = x;
+-    //int x2 = x + rows;
+-
+-    uint8_t partial_window[7] = {
+-      (uint8_t)(y),
+-      (uint8_t)(y + h - 1),
+-      (uint8_t)(x >> 8),
+-      (uint8_t)(x & 0xff),
+-      (uint8_t)((x + w - 1) >> 8),
+-      (uint8_t)((x + w - 1) & 0xff),
+-      0b00000001  // PT_SCAN
+-    };
+-    command(PON); // turn on
+-
+-    command(PTIN); // enable partial mode
+-    command(PTL, sizeof(partial_window), partial_window);
+-
+-    command(DTM2);
+-    for (auto dx = 0; dx < rows; dx++) {
+-      int sx = dx + x1;
+-      int sy = y1;
+-      data(cols, &frame_buffer[sy + (sx * (height / 8))]);
+-    }
+-    command(DSP); // data stop
+-
+-    command(DRF); // start display refresh
+-
+-    if(blocking) {
+-      busy_wait();
+-
+-      command(POF); // turn off
+-    }
++//     if(blocking) {
++//       busy_wait();
++//     }
++// 
++//     int cols = h / 8;
++//     int y1 = y / 8;
++// int y2 = y1 + cols;
++// 
++//     int rows = w;
++//     int x1 = x;
++// int x2 = x + rows;
++// 
++//     uint8_t partial_window[7] = {
++//       (uint8_t)(y),
++//       (uint8_t)(y + h - 1),
++//       (uint8_t)(x >> 8),
++//       (uint8_t)(x & 0xff),
++//       (uint8_t)((x + w - 1) >> 8),
++//       (uint8_t)((x + w - 1) & 0xff),
++//       0b00000001  // PT_SCAN
++//     };
++//     command(PON); // turn on
++// 
++//     command(PTIN); // enable partial mode
++//     command(PTL, sizeof(partial_window), partial_window);
++// 
++//     command(DTM2);
++//     for (auto dx = 0; dx < rows; dx++) {
++//       int sx = dx + x1;
++//       int sy = y1;
++//       data(cols, &frame_buffer[sy + (sx * (height / 8))]);
++//     }
++//     command(DSP); // data stop
++// 
++//     command(DRF); // start display refresh
++// 
++//     if(blocking) {
++//       busy_wait();
++// 
++//       command(POF); // turn off
++//     }
+   }
+ 
+   void UC8151_Legacy::update(bool blocking) {
+     if(blocking) {
+       busy_wait();
+     }
++    command(0x24, (width * height) / 8, frame_buffer);
++    command(0x22, {0xF7});
++    command(0x20);
++    busy_wait();
++    command(0x22, {0x83});
++    command(0x20);
++    busy_wait();
+ 
+-    command(PON); // turn on
+-
+-    command(PTOU); // disable partial mode
+-
+-    command(DTM2, (width * height) / 8, frame_buffer); // transmit framebuffer
+-    command(DSP); // data stop
+-
+-    command(DRF); // start display refresh
++//     command(PON); // turn on
++// 
++//     command(PTOU); // disable partial mode
++// 
++//     command(DTM2, (width * height) / 8, frame_buffer); // transmit framebuffer
++//     command(DSP); // data stop
++// 
++//     command(DRF); // start display refresh
+ 
+-    if(blocking) {
+-      busy_wait();
++//     if(blocking) {
++//       busy_wait();
+ 
+-      command(POF); // turn off
+-    }
++//       command(POF); // turn off
++//     }
+   }
+ 
+   void UC8151_Legacy::off() {
+     busy_wait();
+-    command(POF); // turn off
++//     command(POF); // turn off
++    command(0x10, {0x01}); //enter deep sleep
++    sleep_ms(100);
+   }
+ 
+ }
+diff --git a/drivers/uc8151_legacy/uc8151_legacy.hpp b/drivers/uc8151_legacy/uc8151_legacy.hpp
+index dbb50fcd..81bf951a 100644
+--- a/drivers/uc8151_legacy/uc8151_legacy.hpp
++++ b/drivers/uc8151_legacy/uc8151_legacy.hpp
+@@ -137,12 +137,12 @@ namespace pimoroni {
+     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
+ 
+     // interface pins with our standard defaults where appropriate
+-    uint CS     = SPI_BG_FRONT_CS;
+-    uint DC     = SPI_DEFAULT_MISO;
+-    uint SCK    = SPI_DEFAULT_SCK;
+-    uint MOSI   = SPI_DEFAULT_MOSI;
+-    uint BUSY   = PIN_UNUSED;
+-    uint RESET  = PIN_UNUSED;
++    uint CS     = 17;
++    uint DC     = 20;
++    uint SCK    = 18;
++    uint MOSI   = 19;
++    uint BUSY   = 26;
++    uint RESET  = 21;
+ 
+     bool inverted = false;
+ 
+@@ -160,7 +160,7 @@ namespace pimoroni {
+     UC8151_Legacy(uint16_t width, uint16_t height,
+            spi_inst_t *spi,
+            uint CS, uint DC, uint SCK, uint MOSI,
+-           uint BUSY = PIN_UNUSED, uint RESET = PIN_UNUSED) :
++           uint BUSY, uint RESET) :
+       width(width), height(height),
+       frame_buffer(new uint8_t[width * height / 8]),
+       spi(spi),
+@@ -170,7 +170,7 @@ namespace pimoroni {
+            uint8_t *frame_buffer,
+            spi_inst_t *spi,
+            uint CS, uint DC, uint SCK, uint MOSI,
+-           uint BUSY = PIN_UNUSED, uint RESET = PIN_UNUSED) :
++           uint BUSY, uint RESET) :
+       width(width), height(height),
+       frame_buffer(frame_buffer),
+       spi(spi),
+diff --git a/libraries/badger2040/badger2040.cpp b/libraries/badger2040/badger2040.cpp
+index 6be32b91..0d44a571 100644
+--- a/libraries/badger2040/badger2040.cpp
++++ b/libraries/badger2040/badger2040.cpp
+@@ -124,8 +124,8 @@ namespace pimoroni {
+ 
+ 
+   void Badger2040::clear() {
+-    const uint32_t column_len = 128 / 8;
+-    const uint32_t buf_len = column_len * 296;
++    const uint32_t column_len = 200 / 8;
++    const uint32_t buf_len = column_len * 200;
+     uint8_t* buf = uc8151_legacy.get_frame_buffer();
+     
+     if (_pen == 0) {
+@@ -135,7 +135,7 @@ namespace pimoroni {
+       memset(buf, 0, buf_len);
+     }
+     else {
+-      for(uint32_t x = 0; x < 296; x++) {
++      for(uint32_t x = 0; x < 200; x++) {
+         uint8_t val = _dither_column_value(x, _pen);
+         memset(buf, val, column_len);
+         buf += column_len;
+@@ -161,20 +161,20 @@ namespace pimoroni {
+     image(data, sheet_width, icon_size * index, 0, icon_size, icon_size, dx, dy);
+   }
+ 
+-  // Display an image that fills the screen (296*128)
++  // Display an image that fills the screen (200*200)
+   void Badger2040::image(const uint8_t* data) {
+     uint8_t* ptr = uc8151_legacy.get_frame_buffer();
+-    
+-    for (uint32_t x = 0; x < 296; ++x) {
++
++    for (uint32_t x = 0; x < 200; ++x) {
+       // extract bitmask for this pixel
+       uint32_t bm = 0b10000000 >> (x & 0b111);
+-      
+-      for (uint32_t y = 0; y < 128; y += 8) {
++
++      for (uint32_t y = 0; y < 200; y += 8) {
+         uint8_t val = 0;
+         for (uint32_t cy = 0; cy < 8; ++cy) {
+           // work out byte offset in source data
+-          uint32_t o = ((y + cy) * (296 >> 3)) + (x >> 3);
+-          
++          uint32_t o = ((y + cy) * (200 >> 3)) + (x >> 3);
++
+           // Set bit in val if set in source data
+           if (data[o] & bm) {
+             val |= 0b10000000 >> cy;
+@@ -187,7 +187,7 @@ namespace pimoroni {
+ 
+   // Display an image smaller than the screen (sw*sh) at dx, dy
+   void Badger2040::image(const uint8_t *data, int w, int h, int x, int y) {
+-    if (x == 0 && y == 0 && w == 296 && h == 128) {
++    if (x == 0 && y == 0 && w == 200 && h == 200) {
+       image(data);
+     }
+     else {
+@@ -225,11 +225,11 @@ namespace pimoroni {
+     }
+     w += _thickness - 1;
+     h += _thickness - 1;
+-    if (x + w > 296) {
+-      w = 296 - x;
++    if (x + w > 200) {
++      w = 200 - x;
+     }
+-    if (y + h > 128) {
+-      h = 128 - y;
++    if (y + h > 200) {
++      h = 200 - y;
+     }
+ 
+     if (h >= 8) {
+@@ -237,7 +237,7 @@ namespace pimoroni {
+       uint8_t* buf = uc8151_legacy.get_frame_buffer();
+       
+       for(int cx = x; cx < x + w; cx++) {
+-        uint8_t* buf_ptr = &buf[cx * 16 + y / 8];
++        uint8_t* buf_ptr = &buf[cx * 25 + y / 8];
+         uint8_t first_mask = 0xff >> (y & 7);
+         uint8_t last_mask = 0xff >> ((y + h) & 7);
+         uint32_t val = _dither_column_value(cx, _pen);
+@@ -357,7 +357,7 @@ namespace pimoroni {
+             pixel(x + px, y + py);
+           }
+         }
+-      }, message, x, y, 296 - x, std::max(1.0f, s), letter_spacing);
++      }, message, x, y, 200 - x, std::max(1.0f, s), letter_spacing);
+     } else {
+       hershey::text(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+         line(x1, y1, x2, y2);
+diff --git a/libraries/badger2040/badger2040.hpp b/libraries/badger2040/badger2040.hpp
+index 0d5b1731..efb75bcc 100644
+--- a/libraries/badger2040/badger2040.hpp
++++ b/libraries/badger2040/badger2040.hpp
+@@ -25,11 +25,11 @@ namespace pimoroni {
+ 
+   public:
+     Badger2040()
+-      : uc8151_legacy(296, 128, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
++      : uc8151_legacy(200, 200, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
+     };
+     // Constructor for Python-managed buffer
+     Badger2040(uint8_t *framebuffer)
+-      : uc8151_legacy(296, 128, framebuffer, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
++      : uc8151_legacy(200, 200, framebuffer, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
+     };
+     void init();
+     void update(bool blocking=false);
+diff --git a/micropython/_board/badger2040/fixup.sh b/micropython/_board/badger2040/fixup.sh
+index 6acb551d..cdc9a7cb 100644
+--- a/micropython/_board/badger2040/fixup.sh
++++ b/micropython/_board/badger2040/fixup.sh
+@@ -1,6 +1,10 @@
+ SRC_DIR=$1
+ DST_DIR=$2
+ 
++echo "Applying rp2_pio_c.patch"
++cd "$DST_DIR"
++git apply "$SRC_DIR/rp2_pio_c.patch"
++
+ echo "Applying wakeup_gpio.patch"
+ cd "$DST_DIR/../../lib/pico-sdk"
+-git apply "$SRC_DIR/wakeup_gpio.patch"
+\ No newline at end of file
++git apply "$SRC_DIR/wakeup_gpio.patch"
+diff --git a/micropython/_board/badger2040/rp2_pio_c.patch b/micropython/_board/badger2040/rp2_pio_c.patch
+new file mode 100644
+index 00000000..dab29aa3
+--- /dev/null
++++ b/micropython/_board/badger2040/rp2_pio_c.patch
+@@ -0,0 +1,22 @@
++diff --git a/lib/pico-sdk b/lib/pico-sdk
++--- a/lib/pico-sdk
+++++ b/lib/pico-sdk
++@@ -1 +1 @@
++-Subproject commit 2e6142b15b8a75c1227dd3edbe839193b2bf9041
+++Subproject commit 2e6142b15b8a75c1227dd3edbe839193b2bf9041-dirty
++diff --git a/ports/rp2/rp2_pio.c b/ports/rp2/rp2_pio.c
++index eb85eb224..2f107d251 100644
++--- a/ports/rp2/rp2_pio.c
+++++ b/ports/rp2/rp2_pio.c
++@@ -114,6 +114,11 @@ void rp2_pio_init(void) {
++     // Set up interrupts.
++     memset(MP_STATE_PORT(rp2_pio_irq_obj), 0, sizeof(MP_STATE_PORT(rp2_pio_irq_obj)));
++     memset(MP_STATE_PORT(rp2_state_machine_irq_obj), 0, sizeof(MP_STATE_PORT(rp2_state_machine_irq_obj)));
+++
+++    irq_set_mask_enabled((1u << PIO0_IRQ_0) | (1u << PIO0_IRQ_1), false);
+++    irq_remove_handler(PIO0_IRQ_0, irq_get_exclusive_handler(PIO0_IRQ_0));
+++    irq_remove_handler(PIO0_IRQ_1, irq_get_exclusive_handler(PIO0_IRQ_1));
+++
++     irq_set_exclusive_handler(PIO0_IRQ_0, pio0_irq0);
++     irq_set_exclusive_handler(PIO1_IRQ_0, pio1_irq0);
++ }
+diff --git a/micropython/_board/board-fixup.sh b/micropython/_board/board-fixup.sh
+index ad62502c..def0254e 100755
+--- a/micropython/_board/board-fixup.sh
++++ b/micropython/_board/board-fixup.sh
+@@ -16,6 +16,6 @@ if [[ ! -d "$MPY_DIR/boards/$BOARD" ]] && [[ -d "$FIXUP_DIR/$NAME/$BOARD/" ]]; t
+ fi
+ 
+ if [[ -f "$FIXUP_DIR/$NAME/fixup.sh" ]]; then
+-    echo "Running custom fixup[.sh"
++    echo "Running custom fixup.sh"
+     bash "$FIXUP_DIR/$NAME/fixup.sh" "$FIXUP_DIR/$NAME" "$MPY_DIR"
+-fi
+\ No newline at end of file
++fi
+diff --git a/micropython/examples/badger2040/assets/boot.py b/micropython/examples/badger2040/assets/boot.py
+index 76b5ef6d..ecf463e8 100644
+--- a/micropython/examples/badger2040/assets/boot.py
++++ b/micropython/examples/badger2040/assets/boot.py
+@@ -2,5 +2,8 @@ try:
+     open("main.py", "r")
+ except OSError:
+     with open("main.py", "w") as f:
+-        f.write("import _launcher")
++        f.write("from ostentus import ostentus\n\n")
++        f.write("o = ostentus()\n")
++        f.write("o.listen()\n")
+         f.flush()
++
+diff --git a/micropython/examples/badger2040/micropython-builtins.cmake b/micropython/examples/badger2040/micropython-builtins.cmake
+index 68c04aee..0d4849f9 100644
+--- a/micropython/examples/badger2040/micropython-builtins.cmake
++++ b/micropython/examples/badger2040/micropython-builtins.cmake
+@@ -53,3 +53,8 @@ copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/help.py _help)
+ copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/info.py _info)
+ copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/qrgen.py _qrgen)
+ copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/badger_os.py badger_os)
++copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/ostentus.py ostentus)
++copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/ostentus_leds.py ostentus_leds)
++copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/ostentus_slideshow.py ostentus_slideshow)
++copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/splashscreen_rd.py splashscreen_rd)
++
+diff --git a/micropython/modules/badger2040-micropython.cmake b/micropython/modules/badger2040-micropython.cmake
+index 160ea378..e8c24735 100644
+--- a/micropython/modules/badger2040-micropython.cmake
++++ b/micropython/modules/badger2040-micropython.cmake
+@@ -6,6 +6,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
+ include(pimoroni_i2c/micropython)
+ include(pimoroni_bus/micropython)
+ 
++include(../../../../module/ostentus_i2c/micropython)
++
+ include(breakout_dotmatrix/micropython)
+ include(breakout_encoder/micropython)
+ include(breakout_ioexpander/micropython)
+diff --git a/micropython/modules/badger2040/badger2040.c b/micropython/modules/badger2040/badger2040.c
+index 4aa0dfed..e6a9c439 100644
+--- a/micropython/modules/badger2040/badger2040.c
++++ b/micropython/modules/badger2040/badger2040.c
+@@ -104,8 +104,8 @@ STATIC const mp_rom_map_elem_t badger2040_globals_table[] = {
+     { MP_ROM_QSTR(MP_QSTR_SYSTEM_FAST), MP_ROM_INT(3) },
+     { MP_ROM_QSTR(MP_QSTR_SYSTEM_TURBO), MP_ROM_INT(4) },
+ 
+-    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(296) },
+-    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(128) },
++    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(200) },
++    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(200) },
+ 
+     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(12) },
+     { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(13) },
+diff --git a/micropython/modules/badger2040/badger2040.cpp b/micropython/modules/badger2040/badger2040.cpp
+index b6577e45..9f984e24 100644
+--- a/micropython/modules/badger2040/badger2040.cpp
++++ b/micropython/modules/badger2040/badger2040.cpp
+@@ -82,8 +82,8 @@ mp_obj_t Badger2040_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_
+     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+ 
+-    int width = 296;
+-    int height = 128;
++    int width = 200;
++    int height = 200;
+ 
+     uint8_t *buffer = nullptr;
+ 
+@@ -337,8 +337,8 @@ mp_obj_t Badger2040_image(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
+         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+         { MP_QSTR_data, MP_ARG_REQUIRED | MP_ARG_OBJ },
+ 
+-        { MP_QSTR_w, MP_ARG_INT, {.u_int = 296} },
+-        { MP_QSTR_h, MP_ARG_INT, {.u_int = 128} },
++        { MP_QSTR_w, MP_ARG_INT, {.u_int = 200} },
++        { MP_QSTR_h, MP_ARG_INT, {.u_int = 200} },
+         { MP_QSTR_x, MP_ARG_INT, {.u_int = 0} },
+         { MP_QSTR_y, MP_ARG_INT, {.u_int = 0} }
+     };

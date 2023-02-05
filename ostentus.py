@@ -43,7 +43,11 @@ class ostentus:
         self.str_data[line_idx] = bytearray(b'\x00'*32)
 
     def show_splash(self):
-        splash = bytearray(splashscreen_rd.data())
+        try:
+            splash = bytearray(5000)
+            open("splashscreen.bin", "r").readinto(splash)
+        except:
+            splash = bytearray(splashscreen_rd.data())
         self.display.image(splash)
         self.display.update()
 

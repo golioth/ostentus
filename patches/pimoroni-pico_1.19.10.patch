@@ -1,12 +1,12 @@
 diff --git a/drivers/CMakeLists.txt b/drivers/CMakeLists.txt
-index 5c005228..5188df50 100644
+index 5c005228..bc25862d 100644
 --- a/drivers/CMakeLists.txt
 +++ b/drivers/CMakeLists.txt
 @@ -30,6 +30,7 @@ add_subdirectory(hub75)
  add_subdirectory(uc8151)
  add_subdirectory(uc8159)
  add_subdirectory(uc8151_legacy)
-+add_subdirectory(../../../drivers/GDEH0154D67)
++add_subdirectory(../../../drivers/ssd1681)
  add_subdirectory(pwm)
  add_subdirectory(servo)
  add_subdirectory(encoder)
@@ -18,7 +18,7 @@ index 5c005228..5188df50 100644
 \ No newline at end of file
 +add_subdirectory(st7567)
 diff --git a/libraries/badger2040/badger2040.cmake b/libraries/badger2040/badger2040.cmake
-index 6d8df34b..45cf513b 100644
+index 6d8df34b..07f6fb66 100644
 --- a/libraries/badger2040/badger2040.cmake
 +++ b/libraries/badger2040/badger2040.cmake
 @@ -8,4 +8,4 @@ target_sources(${LIB_NAME} INTERFACE
@@ -26,9 +26,9 @@ index 6d8df34b..45cf513b 100644
  
  # Pull in pico libraries that we need
 -target_link_libraries(${LIB_NAME} INTERFACE bitmap_fonts hershey_fonts pico_stdlib hardware_pwm uc8151_legacy)
-+target_link_libraries(${LIB_NAME} INTERFACE bitmap_fonts hershey_fonts pico_stdlib hardware_pwm GDEH0154D67)
++target_link_libraries(${LIB_NAME} INTERFACE bitmap_fonts hershey_fonts pico_stdlib hardware_pwm ssd1681)
 diff --git a/libraries/badger2040/badger2040.cpp b/libraries/badger2040/badger2040.cpp
-index 6be32b91..fc0d6e2c 100644
+index 6be32b91..41b8d2a1 100644
 --- a/libraries/badger2040/badger2040.cpp
 +++ b/libraries/badger2040/badger2040.cpp
 @@ -64,7 +64,7 @@ namespace pimoroni {
@@ -36,7 +36,7 @@ index 6be32b91..fc0d6e2c 100644
      led(0);
  
 -    uc8151_legacy.init();
-+    GDEH0154D67.init();
++    ssd1681.init();
  
      // TODO: set default image?
    }
@@ -49,7 +49,7 @@ index 6be32b91..fc0d6e2c 100644
 -    uint8_t* buf = uc8151_legacy.get_frame_buffer();
 +    const uint32_t column_len = 200 / 8;
 +    const uint32_t buf_len = column_len * 200;
-+    uint8_t* buf = GDEH0154D67.get_frame_buffer();
++    uint8_t* buf = ssd1681.get_frame_buffer();
      
      if (_pen == 0) {
        memset(buf, 0xff, buf_len);
@@ -67,13 +67,13 @@ index 6be32b91..fc0d6e2c 100644
    void Badger2040::pixel(int32_t x, int32_t y) {
      if(_thickness == 1) {
 -      uc8151_legacy.pixel(x, y, _dither_value(x, y, _pen));
-+      GDEH0154D67.pixel(x, y, _dither_value(x, y, _pen));
++      ssd1681.pixel(x, y, _dither_value(x, y, _pen));
      }else{
        uint8_t ht = _thickness / 2;
        for(int sy = 0; sy < _thickness; sy++) {
          for(int sx = 0; sx < _thickness; sx++) {
 -          uc8151_legacy.pixel(x + sx - ht, y + sy - ht, _dither_value(x + sx - ht, y + sy - ht, _pen));
-+          GDEH0154D67.pixel(x + sx - ht, y + sy - ht, _dither_value(x + sx - ht, y + sy - ht, _pen));
++          ssd1681.pixel(x + sx - ht, y + sy - ht, _dither_value(x + sx - ht, y + sy - ht, _pen));
          }
        }
      }
@@ -87,7 +87,7 @@ index 6be32b91..fc0d6e2c 100644
 -    uint8_t* ptr = uc8151_legacy.get_frame_buffer();
 -    
 -    for (uint32_t x = 0; x < 296; ++x) {
-+    uint8_t* ptr = GDEH0154D67.get_frame_buffer();
++    uint8_t* ptr = ssd1681.get_frame_buffer();
 +
 +    for (uint32_t x = 0; x < 200; ++x) {
        // extract bitmask for this pixel
@@ -120,7 +120,7 @@ index 6be32b91..fc0d6e2c 100644
  
          // draw the pixel
 -        uc8151_legacy.pixel(dx + x, dy + y, data[o] & bm);
-+        GDEH0154D67.pixel(dx + x, dy + y, data[o] & bm);
++        ssd1681.pixel(dx + x, dy + y, data[o] & bm);
        }
      }
    }
@@ -142,7 +142,7 @@ index 6be32b91..fc0d6e2c 100644
      if (h >= 8) {
        // Directly write to the frame buffer when clearing a large area
 -      uint8_t* buf = uc8151_legacy.get_frame_buffer();
-+      uint8_t* buf = GDEH0154D67.get_frame_buffer();
++      uint8_t* buf = ssd1681.get_frame_buffer();
        
        for(int cx = x; cx < x + w; cx++) {
 -        uint8_t* buf_ptr = &buf[cx * 16 + y / 8];
@@ -155,7 +155,7 @@ index 6be32b91..fc0d6e2c 100644
        for(int cx = x; cx < x + w; cx++) {
          for(int cy = y; cy < y + h; cy++) {
 -          uc8151_legacy.pixel(cx, cy, _dither_value(cx, cy, _pen));
-+          GDEH0154D67.pixel(cx, cy, _dither_value(cx, cy, _pen));
++          ssd1681.pixel(cx, cy, _dither_value(cx, cy, _pen));
          }
        }
      }
@@ -164,12 +164,12 @@ index 6be32b91..fc0d6e2c 100644
  
    void Badger2040::debug_command(uint8_t reg, size_t len, const uint8_t *data) {
 -    uc8151_legacy.command(reg, len, data);
-+    GDEH0154D67.command(reg, len, data);
++    ssd1681.command(reg, len, data);
    }
  
    void Badger2040::dump_otp(uint8_t *data) {
 -    uc8151_legacy.read(0xa2,  0xFFF, data);
-+    GDEH0154D67.read(0xa2,  0xFFF, data);
++    ssd1681.read(0xa2,  0xFFF, data);
    }
  
    void Badger2040::update_button_states() {
@@ -178,37 +178,37 @@ index 6be32b91..fc0d6e2c 100644
  
    bool Badger2040::is_busy() {
 -    return uc8151_legacy.is_busy();
-+    return GDEH0154D67.is_busy();
++    return ssd1681.is_busy();
    }
  
    void Badger2040::power_off() {
 -    uc8151_legacy.power_off();
-+    GDEH0154D67.power_off();
++    ssd1681.power_off();
    }
  
    void Badger2040::invert(bool invert) {
 -    uc8151_legacy.invert(invert);
-+    GDEH0154D67.invert(invert);
++    ssd1681.invert(invert);
    }
  
    void Badger2040::update_speed(uint8_t speed) {
 -    uc8151_legacy.update_speed(speed);
-+    GDEH0154D67.update_speed(speed);
++    ssd1681.update_speed(speed);
    }
  
    uint32_t Badger2040::update_time() {
 -    return uc8151_legacy.update_time();
-+    return GDEH0154D67.update_time();
++    return ssd1681.update_time();
    }
  
    void Badger2040::partial_update(int x, int y, int w, int h, bool blocking) {
 -    uc8151_legacy.partial_update(x, y, w, h, blocking);
-+    GDEH0154D67.partial_update(x, y, w, h, blocking);
++    ssd1681.partial_update(x, y, w, h, blocking);
    }
  
    void Badger2040::update(bool blocking) {
 -    uc8151_legacy.update(blocking);
-+    GDEH0154D67.update(blocking);
++    ssd1681.update(blocking);
    }
  
    const hershey::font_glyph_t* Badger2040::glyph_data(unsigned char c) {
@@ -222,7 +222,7 @@ index 6be32b91..fc0d6e2c 100644
        hershey::text(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
          line(x1, y1, x2, y2);
 diff --git a/libraries/badger2040/badger2040.hpp b/libraries/badger2040/badger2040.hpp
-index 0d5b1731..a04e37b6 100644
+index 0d5b1731..b6bb21fc 100644
 --- a/libraries/badger2040/badger2040.hpp
 +++ b/libraries/badger2040/badger2040.hpp
 @@ -2,7 +2,7 @@
@@ -230,21 +230,30 @@ index 0d5b1731..a04e37b6 100644
  #include <string>
  
 -#include "drivers/uc8151_legacy/uc8151_legacy.hpp"
-+#include "../../../../drivers/GDEH0154D67/GDEH0154D67.hpp"
++#include "../../../../drivers/ssd1681/ssd1681.hpp"
  
  #include "libraries/hershey_fonts/hershey_fonts.hpp"
  #include "libraries/bitmap_fonts/bitmap_fonts.hpp"
+@@ -14,7 +14,7 @@ namespace pimoroni {
+ 
+   class Badger2040 {
+   protected:
+-    UC8151_Legacy uc8151_legacy;
++    SSD1681 ssd1681;
+     const hershey::font_t *_font = &hershey::futural;
+     const bitmap::font_t *_bitmap_font = nullptr;
+     uint8_t _pen = 0;
 @@ -25,11 +25,11 @@ namespace pimoroni {
  
    public:
      Badger2040()
 -      : uc8151_legacy(296, 128, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
-+      : uc8151_legacy(200, 200, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
++      : ssd1681(200, 200, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
      };
      // Constructor for Python-managed buffer
      Badger2040(uint8_t *framebuffer)
 -      : uc8151_legacy(296, 128, framebuffer, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
-+      : uc8151_legacy(200, 200, framebuffer, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
++      : ssd1681(200, 200, framebuffer, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
      };
      void init();
      void update(bool blocking=false);
@@ -324,3 +333,23 @@ index b6577e45..9f984e24 100644
          { MP_QSTR_x, MP_ARG_INT, {.u_int = 0} },
          { MP_QSTR_y, MP_ARG_INT, {.u_int = 0} }
      };
+diff --git a/micropython/modules/badger2040/micropython.cmake b/micropython/modules/badger2040/micropython.cmake
+index ded85199..339e61ea 100644
+--- a/micropython/modules/badger2040/micropython.cmake
++++ b/micropython/modules/badger2040/micropython.cmake
+@@ -6,13 +6,13 @@ target_sources(usermod_${MOD_NAME} INTERFACE
+     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.c
+     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
+     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/badger2040/badger2040.cpp
+-    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/uc8151_legacy/uc8151_legacy.cpp
++    ${CMAKE_CURRENT_LIST_DIR}/../../../../../drivers/ssd1681/ssd1681.cpp
+ )
+ 
+ target_include_directories(usermod_${MOD_NAME} INTERFACE
+     ${CMAKE_CURRENT_LIST_DIR}
+     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/badger2040/
+-    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/uc8151_legacy/
++    ${CMAKE_CURRENT_LIST_DIR}/../../../../../drivers/ssd1681/
+ )
+ 
+ target_compile_definitions(usermod_${MOD_NAME} INTERFACE

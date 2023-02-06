@@ -31,6 +31,18 @@ newgrp docker
 docker build -t ostentus_build .
 ```
 
+#### Troubleshooting
+
+If the image build fails with the `cgroups: cgroup mountpoint does not exist:
+unknown` error, run these commands:
+
+```shell
+sudo mkdir /sys/fs/cgroup/systemd
+sudo mount -t cgroup -o none,name=systemd cgroup /sys/fs/cgroup/systemd
+```
+
+Then run the build command again.
+
 ### Create Docker Container
 
 ```shell

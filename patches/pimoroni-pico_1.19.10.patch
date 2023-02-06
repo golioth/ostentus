@@ -1,629 +1,58 @@
-diff --git a/drivers/uc8151_legacy/uc8151_legacy.cpp b/drivers/uc8151_legacy/uc8151_legacy.cpp
-index 10e9431c..5e57b4af 100644
---- a/drivers/uc8151_legacy/uc8151_legacy.cpp
-+++ b/drivers/uc8151_legacy/uc8151_legacy.cpp
-@@ -49,10 +49,11 @@ namespace pimoroni {
-   };
+diff --git a/drivers/CMakeLists.txt b/drivers/CMakeLists.txt
+index 5c005228..5188df50 100644
+--- a/drivers/CMakeLists.txt
++++ b/drivers/CMakeLists.txt
+@@ -30,6 +30,7 @@ add_subdirectory(hub75)
+ add_subdirectory(uc8151)
+ add_subdirectory(uc8159)
+ add_subdirectory(uc8151_legacy)
++add_subdirectory(../../../drivers/GDEH0154D67)
+ add_subdirectory(pwm)
+ add_subdirectory(servo)
+ add_subdirectory(encoder)
+@@ -38,4 +39,4 @@ add_subdirectory(vl53l5cx)
+ add_subdirectory(pcf85063a)
+ add_subdirectory(pms5003)
+ add_subdirectory(sh1107)
+-add_subdirectory(st7567)
+\ No newline at end of file
++add_subdirectory(st7567)
+diff --git a/libraries/badger2040/badger2040.cmake b/libraries/badger2040/badger2040.cmake
+index 6d8df34b..45cf513b 100644
+--- a/libraries/badger2040/badger2040.cmake
++++ b/libraries/badger2040/badger2040.cmake
+@@ -8,4 +8,4 @@ target_sources(${LIB_NAME} INTERFACE
+ target_include_directories(${LIB_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
  
-   bool UC8151_Legacy::is_busy() {
--    return !gpio_get(BUSY);
-+    return gpio_get(BUSY);
-   }
- 
-   void UC8151_Legacy::busy_wait() {
-+    return;
-     while(is_busy()) {
-       tight_loop_contents();
-     }
-@@ -64,237 +65,6 @@ namespace pimoroni {
-     busy_wait();
-   }
- 
--  void UC8151_Legacy::default_luts() {
--    command(LUT_VCOM, {
--      0x00, 0x64, 0x64, 0x37, 0x00, 0x01,
--      0x00, 0x8c, 0x8c, 0x00, 0x00, 0x04,
--      0x00, 0x64, 0x64, 0x37, 0x00, 0x01,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00
--    });
--
--    command(LUT_WW, {
--      0x54, 0x64, 0x64, 0x37, 0x00, 0x01,
--      0x60, 0x8c, 0x8c, 0x00, 0x00, 0x04,
--      0xa8, 0x64, 0x64, 0x37, 0x00, 0x01,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_BW, {
--      0x54, 0x64, 0x64, 0x37, 0x00, 0x01,
--      0x60, 0x8c, 0x8c, 0x00, 0x00, 0x04,
--      0xa8, 0x64, 0x64, 0x37, 0x00, 0x01,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_WB, {
--      0xa8, 0x64, 0x64, 0x37, 0x00, 0x01,
--      0x60, 0x8c, 0x8c, 0x00, 0x00, 0x04,
--      0x54, 0x64, 0x64, 0x37, 0x00, 0x01,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_BB, {
--      0xa8, 0x64, 0x64, 0x37, 0x00, 0x01,
--      0x60, 0x8c, 0x8c, 0x00, 0x00, 0x04,
--      0x54, 0x64, 0x64, 0x37, 0x00, 0x01,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    busy_wait();
--  }
--
--  void UC8151_Legacy::medium_luts() {
--
--    command(LUT_VCOM, {
--      0x00, 0x16, 0x16, 0x0d, 0x00, 0x01,
--      0x00, 0x23, 0x23, 0x00, 0x00, 0x02,
--      0x00, 0x16, 0x16, 0x0d, 0x00, 0x01,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00
--    });
--
--    command(LUT_WW, {
--      0x54, 0x16, 0x16, 0x0d, 0x00, 0x01,
--      0x60, 0x23, 0x23, 0x00, 0x00, 0x02,
--      0xa8, 0x16, 0x16, 0x0d, 0x00, 0x01,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_BW, {
--      0x54, 0x16, 0x16, 0x0d, 0x00, 0x01,
--      0x60, 0x23, 0x23, 0x00, 0x00, 0x02,
--      0xa8, 0x16, 0x16, 0x0d, 0x00, 0x01,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_WB, {
--      0xa8, 0x16, 0x16, 0x0d, 0x00, 0x01,
--      0x60, 0x23, 0x23, 0x00, 0x00, 0x02,
--      0x54, 0x16, 0x16, 0x0d, 0x00, 0x01,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_BB, {
--      0xa8, 0x16, 0x16, 0x0d, 0x00, 0x01,
--      0x60, 0x23, 0x23, 0x00, 0x00, 0x02,
--      0x54, 0x16, 0x16, 0x0d, 0x00, 0x01,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    busy_wait();
--  }
--
--  void UC8151_Legacy::fast_luts() {
--    // 0x3c, 0x00, 0x2b, 0x2b, 0x24, 0x1a, ????
--    command(LUT_VCOM, {
--      0x00, 0x04, 0x04, 0x07, 0x00, 0x01,
--      0x00, 0x0c, 0x0c, 0x00, 0x00, 0x02,
--      0x00, 0x04, 0x04, 0x07, 0x00, 0x02,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00
--    });
--
--    command(LUT_WW, {
--      0x54, 0x04, 0x04, 0x07, 0x00, 0x01,
--      0x60, 0x0c, 0x0c, 0x00, 0x00, 0x02,
--      0xa8, 0x04, 0x04, 0x07, 0x00, 0x02,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_BW, {
--      0x54, 0x04, 0x04, 0x07, 0x00, 0x01,
--      0x60, 0x0c, 0x0c, 0x00, 0x00, 0x02,
--      0xa8, 0x04, 0x04, 0x07, 0x00, 0x02,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_WB, {
--      0xa8, 0x04, 0x04, 0x07, 0x00, 0x01,
--      0x60, 0x0c, 0x0c, 0x00, 0x00, 0x02,
--      0x54, 0x04, 0x04, 0x07, 0x00, 0x02,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_BB, {
--      0xa8, 0x04, 0x04, 0x07, 0x00, 0x01,
--      0x60, 0x0c, 0x0c, 0x00, 0x00, 0x02,
--      0x54, 0x04, 0x04, 0x07, 0x00, 0x02,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(PLL, {
--      HZ_200
--    });
--
--    busy_wait();
--  }
--
--  void UC8151_Legacy::turbo_luts() {
--    // 0x3c, 0x00, 0x2b, 0x2b, 0x24, 0x1a, ????
--    command(LUT_VCOM, {
--      0x00, 0x01, 0x01, 0x02, 0x00, 0x01,
--      0x00, 0x02, 0x02, 0x00, 0x00, 0x02,
--      0x00, 0x02, 0x02, 0x03, 0x00, 0x02,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00
--    });
--
--    command(LUT_WW, {
--      0x54, 0x01, 0x01, 0x02, 0x00, 0x01,
--      0x60, 0x02, 0x02, 0x00, 0x00, 0x02,
--      0xa8, 0x02, 0x02, 0x03, 0x00, 0x02,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_BW, {
--      0x54, 0x01, 0x01, 0x02, 0x00, 0x01,
--      0x60, 0x02, 0x02, 0x00, 0x00, 0x02,
--      0xa8, 0x02, 0x02, 0x03, 0x00, 0x02,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_WB, {
--      0xa8, 0x01, 0x01, 0x02, 0x00, 0x01,
--      0x60, 0x02, 0x02, 0x00, 0x00, 0x02,
--      0x54, 0x02, 0x02, 0x03, 0x00, 0x02,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(LUT_BB, {
--      0xa8, 0x01, 0x01, 0x02, 0x00, 0x01,
--      0x60, 0x02, 0x02, 0x00, 0x00, 0x02,
--      0x54, 0x02, 0x02, 0x03, 0x00, 0x02,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
--      0x00, 0x00, 0x00, 0x00, 0x00, 0x00
--    });
--
--    command(PLL, {
--      HZ_200
--    });
--
--    busy_wait();
--  }
--
-   void UC8151_Legacy::init() {
-     // configure spi interface and pins
-     spi_init(spi, 12'000'000);
-@@ -312,7 +82,7 @@ namespace pimoroni {
- 
-     gpio_set_function(BUSY, GPIO_FUNC_SIO);
-     gpio_set_dir(BUSY, GPIO_IN);
--    gpio_set_pulls(BUSY, true, false);
-+    gpio_set_pulls(BUSY, false, true);
- 
-     gpio_set_function(SCK,  GPIO_FUNC_SPI);
-     gpio_set_function(MOSI, GPIO_FUNC_SPI);
-@@ -323,74 +93,89 @@ namespace pimoroni {
-   void UC8151_Legacy::setup(uint8_t speed) {
-     reset();
- 
--    _update_speed = speed;
--
--    if(speed == 0) {
--      command(PSR, {
--        RES_128x296 | LUT_OTP | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
--      });
--    } else {
--      command(PSR, {
--        RES_128x296 | LUT_REG | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
--      });
--    }
--    switch(speed) {
--      case 0:
--        // Note: the defult luts are built in so we don't really need to flash them here
--        // they are preserved above for posterity and reference mostly.
--        break;
--      case 1:
--        medium_luts();
--        break;
--      case 2:
--        fast_luts();
--        break;
--      case 3:
--        turbo_luts();
--        break;
--      default:
--        break;
--    }
--
--    command(PWR, {
--      VDS_INTERNAL | VDG_INTERNAL,
--      VCOM_VD | VGHL_16V,
--      0b101011,
--      0b101011,
--      0b101011
--    });
--
--    command(PON); // power on
-     busy_wait();
--
--    // booster soft start configuration
--    command(BTST, {
--      START_10MS | STRENGTH_3 | OFF_6_58US,
--      START_10MS | STRENGTH_3 | OFF_6_58US,
--      START_10MS | STRENGTH_3 | OFF_6_58US
--    });
--
--    command(PFS, {
--      FRAMES_1
--    });
--
--    command(TSE, {
--      TEMP_INTERNAL | OFFSET_0
--    });
--
--    command(TCON, {0x22}); // tcon setting
--    command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
--
--    command(PLL, {
--      HZ_100
--    });
--
--    command(POF);
-+    command(0x12);  //SWRESET
-+    busy_wait();
-+    sleep_ms(100);
-+
-+    command(0x01, {0xC7, 0x00, 0x00}); //Driver output control
-+    command(0x11, {0x01}); //data entry mode
-+    command(0x44, {0x00, 0x18}); //set Ram-X address start/end position
-+    command(0x45, {0xC7, 0x00, 0x00, 0x00}); //set Ram-Y address start/end position
-+    command(0x3C, {0x05}); //BorderWavefrom
-+    command(0x18, {0x80}); //Reading temperature sensor
-+    command(0x4E, {0x00});   // set RAM x address count to 0;
-+    command(0x4F, {0xC7, 0x00});   // set RAM y address count to 0X199;
-     busy_wait();
-+
-+//     _update_speed = speed;
-+// 
-+//     if(speed == 0) {
-+//       command(PSR, {
-+//         RES_128x296 | LUT_OTP | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
-+//       });
-+//     } else {
-+//       command(PSR, {
-+//         RES_128x296 | LUT_REG | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
-+//       });
-+//     }
-+//     switch(speed) {
-+//       case 0:
-+// Note: the defult luts are built in so we don't really need to flash them here
-+// they are preserved above for posterity and reference mostly.
-+//         break;
-+//       case 1:
-+//         medium_luts();
-+//         break;
-+//       case 2:
-+//         fast_luts();
-+//         break;
-+//       case 3:
-+//         turbo_luts();
-+//         break;
-+//       default:
-+//         break;
-+//     }
-+// 
-+//     command(PWR, {
-+//       VDS_INTERNAL | VDG_INTERNAL,
-+//       VCOM_VD | VGHL_16V,
-+//       0b101011,
-+//       0b101011,
-+//       0b101011
-+//     });
-+// 
-+//     command(PON); // power on
-+//     busy_wait();
-+// 
-+// booster soft start configuration
-+//     command(BTST, {
-+//       START_10MS | STRENGTH_3 | OFF_6_58US,
-+//       START_10MS | STRENGTH_3 | OFF_6_58US,
-+//       START_10MS | STRENGTH_3 | OFF_6_58US
-+//     });
-+// 
-+//     command(PFS, {
-+//       FRAMES_1
-+//     });
-+// 
-+//     command(TSE, {
-+//       TEMP_INTERNAL | OFFSET_0
-+//     });
-+// 
-+//     command(TCON, {0x22}); // tcon setting
-+//     command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
-+// 
-+//     command(PLL, {
-+//       HZ_100
-+//     });
-+// 
-+//     command(POF);
-+//     busy_wait();
-   }
- 
-   void UC8151_Legacy::power_off() {
--    command(POF);
-+    //command(POF);
-   }
- 
-   void UC8151_Legacy::read(uint8_t reg, size_t len, uint8_t *data) {
-@@ -466,12 +251,12 @@ namespace pimoroni {
-   }
- 
-   void UC8151_Legacy::invert(bool inv) {
--    inverted = inv;
--    command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
-+//     inverted = inv;
-+//     command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
-   }
- 
-   void UC8151_Legacy::update_speed(uint8_t speed) {
--    setup(speed);
-+//     setup(speed);
-   }
- 
-   uint8_t UC8151_Legacy::update_speed() {
-@@ -496,73 +281,82 @@ namespace pimoroni {
-   void UC8151_Legacy::partial_update(int x, int y, int w, int h, bool blocking) {
-     // y is given in columns ("banks"), which are groups of 8 horiontal pixels
-     // x is given in pixels
--    if(blocking) {
--      busy_wait();
--    }
--
--    int cols = h / 8;
--    int y1 = y / 8;
--    //int y2 = y1 + cols;
--
--    int rows = w;
--    int x1 = x;
--    //int x2 = x + rows;
--
--    uint8_t partial_window[7] = {
--      (uint8_t)(y),
--      (uint8_t)(y + h - 1),
--      (uint8_t)(x >> 8),
--      (uint8_t)(x & 0xff),
--      (uint8_t)((x + w - 1) >> 8),
--      (uint8_t)((x + w - 1) & 0xff),
--      0b00000001  // PT_SCAN
--    };
--    command(PON); // turn on
--
--    command(PTIN); // enable partial mode
--    command(PTL, sizeof(partial_window), partial_window);
--
--    command(DTM2);
--    for (auto dx = 0; dx < rows; dx++) {
--      int sx = dx + x1;
--      int sy = y1;
--      data(cols, &frame_buffer[sy + (sx * (height / 8))]);
--    }
--    command(DSP); // data stop
--
--    command(DRF); // start display refresh
--
--    if(blocking) {
--      busy_wait();
--
--      command(POF); // turn off
--    }
-+//     if(blocking) {
-+//       busy_wait();
-+//     }
-+// 
-+//     int cols = h / 8;
-+//     int y1 = y / 8;
-+// int y2 = y1 + cols;
-+// 
-+//     int rows = w;
-+//     int x1 = x;
-+// int x2 = x + rows;
-+// 
-+//     uint8_t partial_window[7] = {
-+//       (uint8_t)(y),
-+//       (uint8_t)(y + h - 1),
-+//       (uint8_t)(x >> 8),
-+//       (uint8_t)(x & 0xff),
-+//       (uint8_t)((x + w - 1) >> 8),
-+//       (uint8_t)((x + w - 1) & 0xff),
-+//       0b00000001  // PT_SCAN
-+//     };
-+//     command(PON); // turn on
-+// 
-+//     command(PTIN); // enable partial mode
-+//     command(PTL, sizeof(partial_window), partial_window);
-+// 
-+//     command(DTM2);
-+//     for (auto dx = 0; dx < rows; dx++) {
-+//       int sx = dx + x1;
-+//       int sy = y1;
-+//       data(cols, &frame_buffer[sy + (sx * (height / 8))]);
-+//     }
-+//     command(DSP); // data stop
-+// 
-+//     command(DRF); // start display refresh
-+// 
-+//     if(blocking) {
-+//       busy_wait();
-+// 
-+//       command(POF); // turn off
-+//     }
-   }
- 
-   void UC8151_Legacy::update(bool blocking) {
-     if(blocking) {
-       busy_wait();
-     }
-+    command(0x24, (width * height) / 8, frame_buffer);
-+    command(0x22, {0xF7});
-+    command(0x20);
-+    busy_wait();
-+    command(0x22, {0x83});
-+    command(0x20);
-+    busy_wait();
- 
--    command(PON); // turn on
--
--    command(PTOU); // disable partial mode
--
--    command(DTM2, (width * height) / 8, frame_buffer); // transmit framebuffer
--    command(DSP); // data stop
--
--    command(DRF); // start display refresh
-+//     command(PON); // turn on
-+// 
-+//     command(PTOU); // disable partial mode
-+// 
-+//     command(DTM2, (width * height) / 8, frame_buffer); // transmit framebuffer
-+//     command(DSP); // data stop
-+// 
-+//     command(DRF); // start display refresh
- 
--    if(blocking) {
--      busy_wait();
-+//     if(blocking) {
-+//       busy_wait();
- 
--      command(POF); // turn off
--    }
-+//       command(POF); // turn off
-+//     }
-   }
- 
-   void UC8151_Legacy::off() {
-     busy_wait();
--    command(POF); // turn off
-+//     command(POF); // turn off
-+    command(0x10, {0x01}); //enter deep sleep
-+    sleep_ms(100);
-   }
- 
- }
-diff --git a/drivers/uc8151_legacy/uc8151_legacy.hpp b/drivers/uc8151_legacy/uc8151_legacy.hpp
-index dbb50fcd..81bf951a 100644
---- a/drivers/uc8151_legacy/uc8151_legacy.hpp
-+++ b/drivers/uc8151_legacy/uc8151_legacy.hpp
-@@ -137,12 +137,12 @@ namespace pimoroni {
-     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
- 
-     // interface pins with our standard defaults where appropriate
--    uint CS     = SPI_BG_FRONT_CS;
--    uint DC     = SPI_DEFAULT_MISO;
--    uint SCK    = SPI_DEFAULT_SCK;
--    uint MOSI   = SPI_DEFAULT_MOSI;
--    uint BUSY   = PIN_UNUSED;
--    uint RESET  = PIN_UNUSED;
-+    uint CS     = 17;
-+    uint DC     = 20;
-+    uint SCK    = 18;
-+    uint MOSI   = 19;
-+    uint BUSY   = 26;
-+    uint RESET  = 21;
- 
-     bool inverted = false;
- 
-@@ -160,7 +160,7 @@ namespace pimoroni {
-     UC8151_Legacy(uint16_t width, uint16_t height,
-            spi_inst_t *spi,
-            uint CS, uint DC, uint SCK, uint MOSI,
--           uint BUSY = PIN_UNUSED, uint RESET = PIN_UNUSED) :
-+           uint BUSY, uint RESET) :
-       width(width), height(height),
-       frame_buffer(new uint8_t[width * height / 8]),
-       spi(spi),
-@@ -170,7 +170,7 @@ namespace pimoroni {
-            uint8_t *frame_buffer,
-            spi_inst_t *spi,
-            uint CS, uint DC, uint SCK, uint MOSI,
--           uint BUSY = PIN_UNUSED, uint RESET = PIN_UNUSED) :
-+           uint BUSY, uint RESET) :
-       width(width), height(height),
-       frame_buffer(frame_buffer),
-       spi(spi),
+ # Pull in pico libraries that we need
+-target_link_libraries(${LIB_NAME} INTERFACE bitmap_fonts hershey_fonts pico_stdlib hardware_pwm uc8151_legacy)
++target_link_libraries(${LIB_NAME} INTERFACE bitmap_fonts hershey_fonts pico_stdlib hardware_pwm GDEH0154D67)
 diff --git a/libraries/badger2040/badger2040.cpp b/libraries/badger2040/badger2040.cpp
-index 6be32b91..0d44a571 100644
+index 6be32b91..fc0d6e2c 100644
 --- a/libraries/badger2040/badger2040.cpp
 +++ b/libraries/badger2040/badger2040.cpp
-@@ -124,8 +124,8 @@ namespace pimoroni {
+@@ -64,7 +64,7 @@ namespace pimoroni {
+     gpio_set_function(LED, GPIO_FUNC_PWM);
+     led(0);
+ 
+-    uc8151_legacy.init();
++    GDEH0154D67.init();
+ 
+     // TODO: set default image?
+   }
+@@ -124,9 +124,9 @@ namespace pimoroni {
  
  
    void Badger2040::clear() {
 -    const uint32_t column_len = 128 / 8;
 -    const uint32_t buf_len = column_len * 296;
+-    uint8_t* buf = uc8151_legacy.get_frame_buffer();
 +    const uint32_t column_len = 200 / 8;
 +    const uint32_t buf_len = column_len * 200;
-     uint8_t* buf = uc8151_legacy.get_frame_buffer();
++    uint8_t* buf = GDEH0154D67.get_frame_buffer();
      
      if (_pen == 0) {
+       memset(buf, 0xff, buf_len);
 @@ -135,7 +135,7 @@ namespace pimoroni {
        memset(buf, 0, buf_len);
      }
@@ -633,6 +62,21 @@ index 6be32b91..0d44a571 100644
          uint8_t val = _dither_column_value(x, _pen);
          memset(buf, val, column_len);
          buf += column_len;
+@@ -145,12 +145,12 @@ namespace pimoroni {
+ 
+   void Badger2040::pixel(int32_t x, int32_t y) {
+     if(_thickness == 1) {
+-      uc8151_legacy.pixel(x, y, _dither_value(x, y, _pen));
++      GDEH0154D67.pixel(x, y, _dither_value(x, y, _pen));
+     }else{
+       uint8_t ht = _thickness / 2;
+       for(int sy = 0; sy < _thickness; sy++) {
+         for(int sx = 0; sx < _thickness; sx++) {
+-          uc8151_legacy.pixel(x + sx - ht, y + sy - ht, _dither_value(x + sx - ht, y + sy - ht, _pen));
++          GDEH0154D67.pixel(x + sx - ht, y + sy - ht, _dither_value(x + sx - ht, y + sy - ht, _pen));
+         }
+       }
+     }
 @@ -161,20 +161,20 @@ namespace pimoroni {
      image(data, sheet_width, icon_size * index, 0, icon_size, icon_size, dx, dy);
    }
@@ -640,9 +84,10 @@ index 6be32b91..0d44a571 100644
 -  // Display an image that fills the screen (296*128)
 +  // Display an image that fills the screen (200*200)
    void Badger2040::image(const uint8_t* data) {
-     uint8_t* ptr = uc8151_legacy.get_frame_buffer();
+-    uint8_t* ptr = uc8151_legacy.get_frame_buffer();
 -    
 -    for (uint32_t x = 0; x < 296; ++x) {
++    uint8_t* ptr = GDEH0154D67.get_frame_buffer();
 +
 +    for (uint32_t x = 0; x < 200; ++x) {
        // extract bitmask for this pixel
@@ -670,7 +115,16 @@ index 6be32b91..0d44a571 100644
        image(data);
      }
      else {
-@@ -225,11 +225,11 @@ namespace pimoroni {
+@@ -205,7 +205,7 @@ namespace pimoroni {
+         uint32_t bm = 0b10000000 >> ((x + sx) & 0b111);
+ 
+         // draw the pixel
+-        uc8151_legacy.pixel(dx + x, dy + y, data[o] & bm);
++        GDEH0154D67.pixel(dx + x, dy + y, data[o] & bm);
+       }
+     }
+   }
+@@ -225,19 +225,19 @@ namespace pimoroni {
      }
      w += _thickness - 1;
      h += _thickness - 1;
@@ -686,8 +140,9 @@ index 6be32b91..0d44a571 100644
      }
  
      if (h >= 8) {
-@@ -237,7 +237,7 @@ namespace pimoroni {
-       uint8_t* buf = uc8151_legacy.get_frame_buffer();
+       // Directly write to the frame buffer when clearing a large area
+-      uint8_t* buf = uc8151_legacy.get_frame_buffer();
++      uint8_t* buf = GDEH0154D67.get_frame_buffer();
        
        for(int cx = x; cx < x + w; cx++) {
 -        uint8_t* buf_ptr = &buf[cx * 16 + y / 8];
@@ -695,6 +150,68 @@ index 6be32b91..0d44a571 100644
          uint8_t first_mask = 0xff >> (y & 7);
          uint8_t last_mask = 0xff >> ((y + h) & 7);
          uint32_t val = _dither_column_value(cx, _pen);
+@@ -253,7 +253,7 @@ namespace pimoroni {
+     else {
+       for(int cx = x; cx < x + w; cx++) {
+         for(int cy = y; cy < y + h; cy++) {
+-          uc8151_legacy.pixel(cx, cy, _dither_value(cx, cy, _pen));
++          GDEH0154D67.pixel(cx, cy, _dither_value(cx, cy, _pen));
+         }
+       }
+     }
+@@ -283,11 +283,11 @@ namespace pimoroni {
+   }
+ 
+   void Badger2040::debug_command(uint8_t reg, size_t len, const uint8_t *data) {
+-    uc8151_legacy.command(reg, len, data);
++    GDEH0154D67.command(reg, len, data);
+   }
+ 
+   void Badger2040::dump_otp(uint8_t *data) {
+-    uc8151_legacy.read(0xa2,  0xFFF, data);
++    GDEH0154D67.read(0xa2,  0xFFF, data);
+   }
+ 
+   void Badger2040::update_button_states() {
+@@ -301,31 +301,31 @@ namespace pimoroni {
+   }
+ 
+   bool Badger2040::is_busy() {
+-    return uc8151_legacy.is_busy();
++    return GDEH0154D67.is_busy();
+   }
+ 
+   void Badger2040::power_off() {
+-    uc8151_legacy.power_off();
++    GDEH0154D67.power_off();
+   }
+ 
+   void Badger2040::invert(bool invert) {
+-    uc8151_legacy.invert(invert);
++    GDEH0154D67.invert(invert);
+   }
+ 
+   void Badger2040::update_speed(uint8_t speed) {
+-    uc8151_legacy.update_speed(speed);
++    GDEH0154D67.update_speed(speed);
+   }
+ 
+   uint32_t Badger2040::update_time() {
+-    return uc8151_legacy.update_time();
++    return GDEH0154D67.update_time();
+   }
+ 
+   void Badger2040::partial_update(int x, int y, int w, int h, bool blocking) {
+-    uc8151_legacy.partial_update(x, y, w, h, blocking);
++    GDEH0154D67.partial_update(x, y, w, h, blocking);
+   }
+ 
+   void Badger2040::update(bool blocking) {
+-    uc8151_legacy.update(blocking);
++    GDEH0154D67.update(blocking);
+   }
+ 
+   const hershey::font_glyph_t* Badger2040::glyph_data(unsigned char c) {
 @@ -357,7 +357,7 @@ namespace pimoroni {
              pixel(x + px, y + py);
            }
@@ -705,9 +222,18 @@ index 6be32b91..0d44a571 100644
        hershey::text(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
          line(x1, y1, x2, y2);
 diff --git a/libraries/badger2040/badger2040.hpp b/libraries/badger2040/badger2040.hpp
-index 0d5b1731..efb75bcc 100644
+index 0d5b1731..a04e37b6 100644
 --- a/libraries/badger2040/badger2040.hpp
 +++ b/libraries/badger2040/badger2040.hpp
+@@ -2,7 +2,7 @@
+ 
+ #include <string>
+ 
+-#include "drivers/uc8151_legacy/uc8151_legacy.hpp"
++#include "../../../../drivers/GDEH0154D67/GDEH0154D67.hpp"
+ 
+ #include "libraries/hershey_fonts/hershey_fonts.hpp"
+ #include "libraries/bitmap_fonts/bitmap_fonts.hpp"
 @@ -25,11 +25,11 @@ namespace pimoroni {
  
    public:

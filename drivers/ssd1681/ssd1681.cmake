@@ -1,4 +1,4 @@
-set(DRIVER_NAME GDEH0154D67)
+set(DRIVER_NAME ssd1681)
 add_library(${DRIVER_NAME} INTERFACE)
 
 target_sources(${DRIVER_NAME} INTERFACE

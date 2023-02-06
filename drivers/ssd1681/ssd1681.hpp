@@ -10,7 +10,7 @@
 
 namespace pimoroni {
 
-  class GDEH0154D67 {
+  class SSD1681 {
     enum PSR_FLAGS {
       RES_96x230   = 0b00000000,
       RES_96x252   = 0b01000000,
@@ -149,15 +149,15 @@ namespace pimoroni {
     uint8_t _update_speed = 0;
 
   public:
-    GDEH0154D67(uint16_t width, uint16_t height) :
+    SSD1681(uint16_t width, uint16_t height) :
       width(width), height(height), frame_buffer(new uint8_t[width * height / 8]) {
     }
 
-    GDEH0154D67(uint16_t width, uint16_t height, uint8_t *frame_buffer) :
+    SSD1681(uint16_t width, uint16_t height, uint8_t *frame_buffer) :
       width(width), height(height), frame_buffer(frame_buffer) {
     }
 
-    GDEH0154D67(uint16_t width, uint16_t height,
+    SSD1681(uint16_t width, uint16_t height,
            spi_inst_t *spi,
            uint CS, uint DC, uint SCK, uint MOSI,
            uint BUSY, uint RESET) :
@@ -166,7 +166,7 @@ namespace pimoroni {
       spi(spi),
       CS(CS), DC(DC), SCK(SCK), MOSI(MOSI), BUSY(BUSY), RESET(RESET) {}
 
-    GDEH0154D67(uint16_t width, uint16_t height,
+    SSD1681(uint16_t width, uint16_t height,
            uint8_t *frame_buffer,
            spi_inst_t *spi,
            uint CS, uint DC, uint SCK, uint MOSI,

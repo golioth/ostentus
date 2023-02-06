@@ -1,4 +1,4 @@
-#include "GDEH0154D67.hpp"
+#include "ssd1681.hpp"
 
 #include <cstdlib>
 #include <math.h>
@@ -48,24 +48,24 @@ namespace pimoroni {
     TSSET    = 0xe5
   };
 
-  bool GDEH0154D67::is_busy() {
+  bool SSD1681::is_busy() {
     return gpio_get(BUSY);
   }
 
-  void GDEH0154D67::busy_wait() {
+  void SSD1681::busy_wait() {
     return;
     while(is_busy()) {
       tight_loop_contents();
     }
   }
 
-  void GDEH0154D67::reset() {
+  void SSD1681::reset() {
     gpio_put(RESET, 0); sleep_ms(10);
     gpio_put(RESET, 1); sleep_ms(10);
     busy_wait();
   }
 
-  void GDEH0154D67::init() {
+  void SSD1681::init() {
     // configure spi interface and pins
     spi_init(spi, 12'000'000);
 
@@ -90,7 +90,7 @@ namespace pimoroni {
     setup();
   };
 
-  void GDEH0154D67::setup(uint8_t speed) {
+  void SSD1681::setup(uint8_t speed) {
     reset();
 
     busy_wait();
@@ -174,11 +174,11 @@ namespace pimoroni {
 //     busy_wait();
   }
 
-  void GDEH0154D67::power_off() {
+  void SSD1681::power_off() {
     //command(POF);
   }
 
-  void GDEH0154D67::read(uint8_t reg, size_t len, uint8_t *data) {
+  void SSD1681::read(uint8_t reg, size_t len, uint8_t *data) {
     gpio_put(CS, 0);
 
     gpio_put(DC, 0); // command mode
@@ -206,7 +206,7 @@ namespace pimoroni {
     gpio_put(CS, 1);
   }
 
-  void GDEH0154D67::command(uint8_t reg, size_t len, const uint8_t *data) {
+  void SSD1681::command(uint8_t reg, size_t len, const uint8_t *data) {
     gpio_put(CS, 0);
 
     gpio_put(DC, 0); // command mode
@@ -220,18 +220,18 @@ namespace pimoroni {
     gpio_put(CS, 1);
   }
 
-  void GDEH0154D67::data(size_t len, const uint8_t *data) {
+  void SSD1681::data(size_t len, const uint8_t *data) {
     gpio_put(CS, 0);
     gpio_put(DC, 1); // data mode
     spi_write_blocking(spi, (const uint8_t*)data, len);
     gpio_put(CS, 1);
   }
 
-  void GDEH0154D67::command(uint8_t reg, std::initializer_list<uint8_t> values) {
+  void SSD1681::command(uint8_t reg, std::initializer_list<uint8_t> values) {
     command(reg, values.size(), (uint8_t *)values.begin());
   }
 
-  void GDEH0154D67::pixel(int x, int y, int v) {
+  void SSD1681::pixel(int x, int y, int v) {
     // bounds check
     if(x < 0 || y < 0 || x >= width || y >= height) return;
 
@@ -246,24 +246,24 @@ namespace pimoroni {
     *p |= b; // set bit value
   }
 
-  uint8_t* GDEH0154D67::get_frame_buffer() {
+  uint8_t* SSD1681::get_frame_buffer() {
 	  return frame_buffer;
   }
 
-  void GDEH0154D67::invert(bool inv) {
+  void SSD1681::invert(bool inv) {
 //     inverted = inv;
 //     command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
   }
 
-  void GDEH0154D67::update_speed(uint8_t speed) {
+  void SSD1681::update_speed(uint8_t speed) {
 //     setup(speed);
   }
 
-  uint8_t GDEH0154D67::update_speed() {
+  uint8_t SSD1681::update_speed() {
     return _update_speed;
   }
 
-  uint32_t GDEH0154D67::update_time() {
+  uint32_t SSD1681::update_time() {
     switch(_update_speed) {
       case 0:
         return 4500;
@@ -278,7 +278,7 @@ namespace pimoroni {
     }
   }
 
-  void GDEH0154D67::partial_update(int x, int y, int w, int h, bool blocking) {
+  void SSD1681::partial_update(int x, int y, int w, int h, bool blocking) {
     // y is given in columns ("banks"), which are groups of 8 horiontal pixels
     // x is given in pixels
 //     if(blocking) {
@@ -324,7 +324,7 @@ namespace pimoroni {
 //     }
   }
 
-  void GDEH0154D67::update(bool blocking) {
+  void SSD1681::update(bool blocking) {
     if(blocking) {
       busy_wait();
     }
@@ -352,7 +352,7 @@ namespace pimoroni {
 //     }
   }
 
-  void GDEH0154D67::off() {
+  void SSD1681::off() {
     busy_wait();
 //     command(POF); // turn off
     command(0x10, {0x01}); //enter deep sleep

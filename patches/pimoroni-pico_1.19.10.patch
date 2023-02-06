@@ -722,83 +722,19 @@ index 0d5b1731..efb75bcc 100644
      };
      void init();
      void update(bool blocking=false);
-diff --git a/micropython/_board/badger2040/fixup.sh b/micropython/_board/badger2040/fixup.sh
-index 6acb551d..cdc9a7cb 100644
---- a/micropython/_board/badger2040/fixup.sh
-+++ b/micropython/_board/badger2040/fixup.sh
-@@ -1,6 +1,10 @@
- SRC_DIR=$1
- DST_DIR=$2
- 
-+echo "Applying rp2_pio_c.patch"
-+cd "$DST_DIR"
-+git apply "$SRC_DIR/rp2_pio_c.patch"
-+
- echo "Applying wakeup_gpio.patch"
- cd "$DST_DIR/../../lib/pico-sdk"
--git apply "$SRC_DIR/wakeup_gpio.patch"
-\ No newline at end of file
-+git apply "$SRC_DIR/wakeup_gpio.patch"
-diff --git a/micropython/_board/badger2040/rp2_pio_c.patch b/micropython/_board/badger2040/rp2_pio_c.patch
-new file mode 100644
-index 00000000..dab29aa3
---- /dev/null
-+++ b/micropython/_board/badger2040/rp2_pio_c.patch
-@@ -0,0 +1,22 @@
-+diff --git a/lib/pico-sdk b/lib/pico-sdk
-+--- a/lib/pico-sdk
-++++ b/lib/pico-sdk
-+@@ -1 +1 @@
-+-Subproject commit 2e6142b15b8a75c1227dd3edbe839193b2bf9041
-++Subproject commit 2e6142b15b8a75c1227dd3edbe839193b2bf9041-dirty
-+diff --git a/ports/rp2/rp2_pio.c b/ports/rp2/rp2_pio.c
-+index eb85eb224..2f107d251 100644
-+--- a/ports/rp2/rp2_pio.c
-++++ b/ports/rp2/rp2_pio.c
-+@@ -114,6 +114,11 @@ void rp2_pio_init(void) {
-+     // Set up interrupts.
-+     memset(MP_STATE_PORT(rp2_pio_irq_obj), 0, sizeof(MP_STATE_PORT(rp2_pio_irq_obj)));
-+     memset(MP_STATE_PORT(rp2_state_machine_irq_obj), 0, sizeof(MP_STATE_PORT(rp2_state_machine_irq_obj)));
-++
-++    irq_set_mask_enabled((1u << PIO0_IRQ_0) | (1u << PIO0_IRQ_1), false);
-++    irq_remove_handler(PIO0_IRQ_0, irq_get_exclusive_handler(PIO0_IRQ_0));
-++    irq_remove_handler(PIO0_IRQ_1, irq_get_exclusive_handler(PIO0_IRQ_1));
-++
-+     irq_set_exclusive_handler(PIO0_IRQ_0, pio0_irq0);
-+     irq_set_exclusive_handler(PIO1_IRQ_0, pio1_irq0);
-+ }
-diff --git a/micropython/_board/board-fixup.sh b/micropython/_board/board-fixup.sh
-index ad62502c..def0254e 100755
---- a/micropython/_board/board-fixup.sh
-+++ b/micropython/_board/board-fixup.sh
-@@ -16,6 +16,6 @@ if [[ ! -d "$MPY_DIR/boards/$BOARD" ]] && [[ -d "$FIXUP_DIR/$NAME/$BOARD/" ]]; t
- fi
- 
- if [[ -f "$FIXUP_DIR/$NAME/fixup.sh" ]]; then
--    echo "Running custom fixup[.sh"
-+    echo "Running custom fixup.sh"
-     bash "$FIXUP_DIR/$NAME/fixup.sh" "$FIXUP_DIR/$NAME" "$MPY_DIR"
--fi
-\ No newline at end of file
-+fi
-diff --git a/micropython/examples/badger2040/assets/boot.py b/micropython/examples/badger2040/assets/boot.py
-index 76b5ef6d..ecf463e8 100644
---- a/micropython/examples/badger2040/assets/boot.py
-+++ b/micropython/examples/badger2040/assets/boot.py
-@@ -2,5 +2,8 @@ try:
-     open("main.py", "r")
- except OSError:
-     with open("main.py", "w") as f:
--        f.write("import _launcher")
-+        f.write("from ostentus import ostentus\n\n")
-+        f.write("o = ostentus()\n")
-+        f.write("o.listen()\n")
-         f.flush()
-+
 diff --git a/micropython/examples/badger2040/micropython-builtins.cmake b/micropython/examples/badger2040/micropython-builtins.cmake
-index 68c04aee..0d4849f9 100644
+index 68c04aee..ddf65755 100644
 --- a/micropython/examples/badger2040/micropython-builtins.cmake
 +++ b/micropython/examples/badger2040/micropython-builtins.cmake
+@@ -41,7 +41,7 @@ convert_image(usermod_badger2040 launchericons)
+ 
+ convert_raw(usermod_badger2040 289-0-wind-in-the-willows-abridged.txt witw)
+ 
+-copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/assets/boot.py boot)
++copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/boot.py boot)
+ copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/launcher.py _launcher)
+ copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/clock.py _clock)
+ copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/fonts.py _fonts)
 @@ -53,3 +53,8 @@ copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/help.py _help)
  copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/info.py _info)
  copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/qrgen.py _qrgen)

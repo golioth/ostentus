@@ -9,37 +9,8 @@ i2cperipheral.mpy onto the Badger filesystem.
 
 ## Docker
 
-Use the Dockerfile from this repo to generate a build environment:
-
-```
-## Allow image to access private repos via your local keys
-eval $(ssh-agent)
-ssh-add ~/.ssh/id_rsa
-# (type passphrase if prompted)
-
-## Generate container image
-DOCKER_BUILDKIT=1 docker build --ssh default=$SSH_AUTH_SOCK -t "ostentus:Dockerfile" .
-```
-
-At this point the Micropython will have been packaged along with Ostentus files.
-You can access the .uf2 as follows:
-
-```
-container_id=$(docker create "ostentus:Dockerfile")
-docker cp "$container_id:/root/badger/micropython/ports/rp2/build-PIMORONI_BADGER2040/firmware.uf2" .
-docker rm "$container_id"
-```
-
-If you prefer to enter the container use this command:
-
-```
-docker run -it ostentus:Dockerfile /bin/bash
-
-## Working dir is /root/badger/micropython/ports/rp2
-
-## The build command is:
-cmake --build build-PIMORONI_BADGER2040/ -j 2
-```
+It is recommended that you use Docker to build this repository. Please [follow
+the instructions in build-with-docker.md](build-with-docker.md)
 
 ## Manually building the package
 

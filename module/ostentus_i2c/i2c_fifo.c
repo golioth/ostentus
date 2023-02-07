@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "i2c_multi.h"
+#include "led_ctrl.h"
 #include "pico/stdlib.h"
 
 #define OSTENTUS_ADDR 0x12
@@ -79,14 +80,51 @@ void i2c_request_handler(uint8_t address)
 
 void i2c_stop_handler(uint8_t length)
 {
-    //Write data len
+    // Write data len
     _fifo[_fs.tail].len = _fs.idx;
-    //Indicate there's info in the fifo
-    ++_fs.has_data;
-    if (++_fs.tail >= FIFO_SIZE) {
-        _fs.tail = 0;
-    }
 
+    switch(_fifo[_fs.tail].reg) {
+        // Handle LED change directly (don't save to fifo)
+        case ADDR_POWER:
+            if (_fifo[_fs.tail].len) {
+                led_push_single(LED_POWER, _fifo[_fs.tail].data[0]);
+            }
+            break;
+        case ADDR_BATTERY:
+            if (_fifo[_fs.tail].len) {
+                led_push_single(LED_BATTERY, _fifo[_fs.tail].data[0]);
+            }
+            break;
+        case ADDR_INTERNET:
+            if (_fifo[_fs.tail].len) {
+                led_push_single(LED_INTERNET, _fifo[_fs.tail].data[0]);
+            }
+            break;
+        case ADDR_GOLIOTH:
+            if (_fifo[_fs.tail].len) {
+                led_push_single(LED_GOLIOTH, _fifo[_fs.tail].data[0]);
+            }
+            break;
+        case ADDR_USER:
+            if (_fifo[_fs.tail].len) {
+                led_push_single(LED_USER, _fifo[_fs.tail].data[0]);
+            }
+            break;
+        case ADDR_BITMASK:
+            if (_fifo[_fs.tail].len) {
+                led_push_mask(_fifo[_fs.tail].data[0]);
+            }
+            break;
+
+        // Everything else goes into the fifo
+        default:
+            // Indicate there's info in the fifo
+            ++_fs.has_data;
+            if (++_fs.tail >= FIFO_SIZE) {
+                _fs.tail = 0;
+            }
+
+    }
     //Reset to defaults
     _fs.idx = 0;
 }
@@ -119,6 +157,8 @@ void fifo_init(void)
     _fs.tail = 0;
     _fs.has_data = 0;
     _fs.idx = 0;
+
+    led_init();
 
     i2c_multi_init(pio, pin);
     i2c_multi_enable_address(OSTENTUS_ADDR);

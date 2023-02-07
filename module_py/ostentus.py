@@ -208,19 +208,9 @@ class ostentus:
                         slideshow.stop()
                     continue
 
+                # == These address are now processed in the C interrupt ==
                 # Addr 0x10..0x14: set/clear LEDs
                 # Addr 0x18 set/clear LEDs from bitmask
-                elif regAddress in [0x10, 0x11, 0x12, 0x13, 0x14, 0x18]:
-                    if dataLen != 1:
-                        self.print_param_count_err(regAddress, 1, dataLen)
-                        continue
-                    led_f = { 0x10:self.leds.user, 0x11:self.leds.golioth,
-                            0x12:self.leds.internet, 0x13:self.leds.battery,
-                            0x14:self.leds.power, 0x18:self.leds.process_bitmask  }
-
-                    print("Updating LED: ", regAddress, data[dataStart])
-                    led_f[regAddress](data[dataStart])
-                    continue
 
                 # Addr 0x26: store string in memory
                 elif regAddress == 0x26:

@@ -1,12 +1,36 @@
 import machine
 import badger2040
+import ostentus_icons
 from micropython import const
 import cap_touch as touch
 
 _label_y = 50
 _value_y = 130
 
+class Icons:
+    global sprite, d
+    SPRITE_WIDTH = 192
+    ICON_WIDTH = 64
+    NAMES = {
+        "humidity":0,
+        "temperature":1,
+        "pressure":2
+        }
+
+    sprite = bytearray(ostentus_icons.data())
+
+    def get_id_from_name(self, name):
+        if name.lower() in self.NAMES:
+            return self.NAMES[name.lower()]
+        return None
+
+    def write(self, id):
+        if id >= len(self.NAMES):
+            return
+        d.icon(sprite, id, self.SPRITE_WIDTH, self.ICON_WIDTH, 68, 10)
+
 d=badger2040.Badger2040()
+icons=Icons()
 
 _pages = list()
 _page_tracker = 0
@@ -67,12 +91,19 @@ def stop():
     _slideshow_tim.deinit()
 
 def show_label(label):
-    global _label_y
-    d.font("sans")
-    scale = 1
-    d.thickness(3)
+    global _label_y, d, icons
+
     d.pen(15)
-    d.text(label, 0, _label_y, scale)
+
+    id = icons.get_id_from_name(label)
+    print("Label:", label, "ID:", id)
+    if id != None:
+        icons.write(id)
+    else:
+        d.font("sans")
+        scale = 1
+        d.thickness(3)
+        d.text(label, 0, _label_y, scale)
 
 
 def page_tracker_inc():
@@ -96,8 +127,7 @@ def inc_and_show(t=None):
     show_page()
 
 def show_page():
-    global _pages
-    global _page_tracker
+    global _pages, _page_tracker, d
     if len(_pages) < 1:
         return
     p = _pages[_page_tracker]
@@ -108,7 +138,7 @@ def show_page():
     d.update()
 
 def fit_text(text):
-    global _value_y
+    global _value_y, d
     d.font("sans")
     scale = 3
     pixels = 0

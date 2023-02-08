@@ -196,12 +196,18 @@ class ostentus:
 
                 # Addr 0x0C: Start/stop slideshow
                 elif regAddress == 0x0C:
-                    if dataLen != 1:
-                        self.print_param_count_err(regAddress, 1, dataLen)
+                    if dataLen != 4:
+                        self.print_param_count_err(regAddress, 4, dataLen)
                         continue
-                    if data[dataStart]:
-                        print("Starting slideshow")
-                        slideshow.start(0)
+
+                    print(data[dataStart:dataStart+dataLen])
+                    slide_delay = int.from_bytes( \
+                            data[dataStart:dataStart+dataLen], \
+                            "little" \
+                            )
+                    if slide_delay:
+                        print("Starting slideshow with ms delay:", slide_delay)
+                        slideshow.start(slide_delay)
                     else:
                         print("Ending slideshow")
                         slideshow.stop()

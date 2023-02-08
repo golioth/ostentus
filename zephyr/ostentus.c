@@ -91,9 +91,9 @@ int slide_set(uint8_t id, char *str, uint8_t len) {
 	return ostentus_i2c_write(OSTENTUS_SLIDE_SET, len+1);
 }
 
-int slideshow(uint8_t setting) {
-	_ostentus_buf[1] = setting;
-	return ostentus_i2c_write(OSTENTUS_SLIDESHOW, 1);
+int slideshow(uint32_t setting) {
+	memcpy(_ostentus_buf+1, &setting, 4);
+	return ostentus_i2c_write(OSTENTUS_SLIDESHOW, 4);
 }
 
 int led_bitmask(uint8_t bitmask) {

@@ -178,7 +178,7 @@ class ostentus:
                         self.print_param_count_err(regAddress, 2, dataLen)
                         continue
                     slideshow_id = data[dataStart]
-                    slideshow_label = data[dataStart+1:dataStart+dataLen]
+                    slideshow_label = data[dataStart+1:dataStart+dataLen].decode()
                     print("Adding new slideshow page:", slideshow_id, slideshow_label)
                     slideshow.add(slideshow_id, slideshow_label)
                     continue

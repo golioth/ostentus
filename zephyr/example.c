@@ -51,8 +51,8 @@ int main(void) {
 	k_sleep(K_MSEC(3000));
 
 	/* Set up sensor display slides for slideshow */
-	slide_add(1, "Temperature", 12);
-	slide_add(2, "Pressure", 9);
+	slide_add(1, "Temperature", strlen("Temperature"));
+	slide_add(2, "Pressure", strlen("Pressure"));
 	slideshow(1);
 
 	/* Simulated values */

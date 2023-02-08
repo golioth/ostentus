@@ -258,7 +258,7 @@ index 0d5b1731..b6bb21fc 100644
      void init();
      void update(bool blocking=false);
 diff --git a/micropython/examples/badger2040/micropython-builtins.cmake b/micropython/examples/badger2040/micropython-builtins.cmake
-index 68c04aee..6f958bc8 100644
+index 68c04aee..97a000f5 100644
 --- a/micropython/examples/badger2040/micropython-builtins.cmake
 +++ b/micropython/examples/badger2040/micropython-builtins.cmake
 @@ -41,7 +41,7 @@ convert_image(usermod_badger2040 launchericons)
@@ -277,9 +277,9 @@ index 68c04aee..6f958bc8 100644
 +copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/ostentus.py ostentus)
 +copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/ostentus_leds.py ostentus_leds)
 +copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/ostentus_slideshow.py ostentus_slideshow)
++copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/ostentus_icons.py ostentus_icons)
 +copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/splashscreen_rd.py splashscreen_rd)
 +copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/cap_touch.py cap_touch)
-+
 diff --git a/micropython/modules/badger2040-micropython.cmake b/micropython/modules/badger2040-micropython.cmake
 index 160ea378..e8c24735 100644
 --- a/micropython/modules/badger2040-micropython.cmake

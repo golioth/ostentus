@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "ostentus.h"
 
 /* Add ostentus.c to the CMakeLists.txt */
@@ -10,9 +11,10 @@ int main(void) {
 	char msg[32];
 	/* Update Ostentus LEDS using bitmask */
 	led_bitmask(0x1F);
-
+	
 	/* Show Golioth Logo */
 	show_splash();
+
 
 	k_sleep(K_MSEC(2000));
 	clear_memory();
@@ -40,7 +42,7 @@ int main(void) {
 	update_display();
 	k_sleep(K_MSEC(3000));
 
-	/* Write differnt text over what was just written */
+	/* Write different text over what was just written */
 	clear_rectangle(0, 100, 200, 40); // Clear last number from framebuffer
 	snprintk(msg, sizeof(msg), "%s", "Rewrite");
 	clear_text_buffer();
@@ -53,12 +55,16 @@ int main(void) {
 	/* Set up sensor display slides for slideshow */
 	slide_add(1, "Temperature", strlen("Temperature"));
 	slide_add(2, "Pressure", strlen("Pressure"));
-	slideshow(1);
+	slideshow(30000);
 
 	/* Simulated values */
 	uint8_t whole = 26;
 	uint8_t decimal = 0;
+	uint8_t bitmask = 0x01;
 	while(1) {
+		/* Write new LED values */
+		led_bitmask(bitmask);
+
 		/* Write number "##.#" to slide id=1 */
 		snprintk(msg, 6, "%d.%d", whole, decimal);
 		slide_set(1, msg, strlen(msg));
@@ -69,6 +75,13 @@ int main(void) {
 			decimal = 0;
 			++whole;
 		}
+
+		/* Shift the LED mask */
+		bitmask <<= 1;
+		if (bitmask >= (1<<5)) {
+			bitmask = 0x01;
+		}
+
 		k_sleep(K_SECONDS(1));
 	}
 }

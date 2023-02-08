@@ -7,6 +7,8 @@ import cap_touch as touch
 _label_y = 50
 _value_y = 130
 
+_slideshow_delay_ms = 30000
+
 class Icons:
     global sprite, d
     SPRITE_WIDTH = 192
@@ -73,14 +75,23 @@ def set_value_by_id(s_id, value):
         if p.s_id == s_id:
             p.value = value
 
+def timer_start():
+    _slideshow_tim.init( \
+            mode=machine.Timer.PERIODIC, \
+            period=_slideshow_delay_ms, \
+            callback=inc_and_show \
+            )
+
+def timer_stop():
+    _slideshow_tim.deinit()
+
 def start(delay_ms):
-    global _pages
+    global _pages, _slideshow_delay_ms
     if len(_pages) < 1:
         return
-    if (delay_ms < 6000):
-        delay_ms = 30000
-    _slideshow_tim.init(mode=machine.Timer.PERIODIC, period=delay_ms,
-            callback=inc_and_show)
+    if (delay_ms >= 6000):
+        _slideshow_delay_ms = delay_ms
+    timer_start()
     touch.register_callback_left(inc_and_show)
     touch.register_callback_right(dec_and_show)
     touch.start()
@@ -88,7 +99,7 @@ def start(delay_ms):
 
 def stop():
     touch.stop()
-    _slideshow_tim.deinit()
+    timer_stop()
 
 def show_label(label):
     global _label_y, d, icons
@@ -119,10 +130,16 @@ def page_tracker_dec():
         _page_tracker = len(_pages)-1
 
 def dec_and_show(t=None):
+    if not t:
+        timer_stop()
+        timer_start()
     page_tracker_inc()
     show_page()
 
 def inc_and_show(t=None):
+    if not t:
+        timer_stop()
+        timer_start()
     page_tracker_inc()
     show_page()
 

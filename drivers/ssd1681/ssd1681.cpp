@@ -251,8 +251,8 @@ namespace pimoroni {
   }
 
   void SSD1681::invert(bool inv) {
-//     inverted = inv;
-//     command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
+    inverted = inv;
+    command(0x21, {(uint8_t)(inverted ? 0x08 : 0x00)}); // vcom and data interval
   }
 
   void SSD1681::update_speed(uint8_t speed) {

@@ -14,6 +14,11 @@ int slide_add(uint8_t id, char *str, uint8_t len);
 int slide_set(uint8_t id, char *str, uint8_t len);
 int slideshow(uint32_t setting);
 int led_bitmask(uint8_t bitmask);
+int led_power_set(uint8_t state);
+int led_battery_set(uint8_t state);
+int led_internet_set(uint8_t state);
+int led_golioth_set(uint8_t state);
+int led_user_set(uint8_t state);
 int store_text(char *str, uint8_t len);
 int write_text(uint8_t x, uint8_t y, uint8_t thickness);
 

@@ -101,6 +101,31 @@ int led_bitmask(uint8_t bitmask) {
 	return ostentus_i2c_write(OSTENTUS_LED_BITMASK, 1);
 }
 
+int led_power_set(uint8_t state) {
+	_ostentus_buf[1] = state ? 1 : 0;
+	return ostentus_i2c_write(OSTENTUS_LED_POW, 1);
+}
+
+int led_battery_set(uint8_t state) {
+	_ostentus_buf[1] = state ? 1 : 0;
+	return ostentus_i2c_write(OSTENTUS_LED_BAT, 1);
+}
+
+int led_internet_set(uint8_t state) {
+	_ostentus_buf[1] = state ? 1 : 0;
+	return ostentus_i2c_write(OSTENTUS_LED_INT, 1);
+}
+
+int led_golioth_set(uint8_t state) {
+	_ostentus_buf[1] = state ? 1 : 0;
+	return ostentus_i2c_write(OSTENTUS_LED_GOL, 1);
+}
+
+int led_user_set(uint8_t state) {
+	_ostentus_buf[1] = state ? 1 : 0;
+	return ostentus_i2c_write(OSTENTUS_LED_USE, 1);
+}
+
 int store_text(char *str, uint8_t len) {
 	memcpy(_ostentus_buf+1, str, len);
 	return ostentus_i2c_write(OSTENTUS_STORE_TEXT, len);

@@ -21,6 +21,8 @@ class SlideshowSettings:
         self.page_tracker = 0
         self.slideshow_tim = machine.Timer()
         self.partial_update_tim = machine.Timer()
+        self.full_update_pending = False
+        self.partial_update_pending = False
 
         self.d = badger2040.Badger2040()
 
@@ -91,7 +93,7 @@ def timer_start():
     sset.slideshow_tim.init( \
             mode=machine.Timer.PERIODIC, \
             period=sset.slideshow_delay_ms, \
-            callback=inc_and_show \
+            callback=full_update_flag_set \
             )
 
 def timer_stop():
@@ -111,8 +113,11 @@ def start(delay_ms):
     show_page()
 
 def stop():
+    global sset
     touch.stop()
     timer_stop()
+    sset.full_update_pending = False
+    sset.partial_update_pending = False
 
 def show_label(label):
     global sset, icons
@@ -148,6 +153,17 @@ def dec_and_show(t=None):
         timer_start()
     page_tracker_inc()
     show_page()
+
+def full_update_flag_set(t=None):
+    global sset
+    sset.full_update_pending = True
+
+def service_slideshow():
+    global sset
+    if (sset.full_update_pending):
+        sset.full_update_pending = False
+        sset.partial_update_pending = False
+        inc_and_show()
 
 def inc_and_show(t=None):
     if not t:

@@ -238,6 +238,8 @@ class ostentus:
                 else:
                     # Clear receive bytes so they don't get reprocessed as a regAddress
                     print("Ignoring command on regAddress: ", regAddress)
+            else:
+                slideshow.service_slideshow()
 
 '''
 def main():

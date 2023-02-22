@@ -4,13 +4,30 @@ import ostentus_icons
 from micropython import const
 import cap_touch as touch
 
-_label_y = 50
-_value_y = 130
+class SlideshowSettings:
+    def __init__(self, slideshow_delay=None, label_y=None, value_y=None):
+        # Set defaults as necessary
+        if slideshow_delay is None:
+            slideshow_delay = 30000
+        self.slideshow_delay_ms = slideshow_delay
+        if label_y is None:
+            label_y = 50
+        self.label_y = label_y
+        if value_y is None:
+            value_y = 130
+        self.value_y = value_y
 
-_slideshow_delay_ms = 30000
+        self.pages = list()
+        self.page_tracker = 0
+        self.slideshow_tim = machine.Timer()
+        self.partial_update_tim = machine.Timer()
+
+        self.d = badger2040.Badger2040()
+
+sset = SlideshowSettings()
 
 class Icons:
-    global sprite, d
+    global sprite, sset
     SPRITE_WIDTH = 192
     ICON_WIDTH = 64
     NAMES = {
@@ -29,14 +46,9 @@ class Icons:
     def write(self, id):
         if id >= len(self.NAMES):
             return
-        d.icon(sprite, id, self.SPRITE_WIDTH, self.ICON_WIDTH, 68, 10)
+        sset.d.icon(sprite, id, self.SPRITE_WIDTH, self.ICON_WIDTH, 68, 10)
 
-d=badger2040.Badger2040()
 icons=Icons()
-
-_pages = list()
-_page_tracker = 0
-_slideshow_tim = machine.Timer()
 
 _button_left = const(0x01)
 _button_right = const(0x04)
@@ -61,36 +73,37 @@ class slide_page:
         self.label = label
 
 def add(s_id, label):
-    global _pages
-    global _page_tracker
-    for p in _pages:
+    global sset
+    for p in sset.pages:
         if p.s_id == s_id:
-            _pages.remove(p)
-    _pages.append(slide_page(s_id, label))
-    _page_tracker = 0
+            sset.pages.remove(p)
+    sset.pages.append(slide_page(s_id, label))
+    sset.page_tracker = 0
 
 def set_value_by_id(s_id, value):
-    global _pages
-    for p in _pages:
+    global sset
+    for p in sset.pages:
         if p.s_id == s_id:
             p.value = value
 
 def timer_start():
-    _slideshow_tim.init( \
+    global sset
+    sset.slideshow_tim.init( \
             mode=machine.Timer.PERIODIC, \
-            period=_slideshow_delay_ms, \
+            period=sset.slideshow_delay_ms, \
             callback=inc_and_show \
             )
 
 def timer_stop():
-    _slideshow_tim.deinit()
+    global sset
+    sset.slideshow_tim.deinit()
 
 def start(delay_ms):
-    global _pages, _slideshow_delay_ms
-    if len(_pages) < 1:
+    global sset
+    if len(sset.pages) < 1:
         return
     if (delay_ms >= 6000):
-        _slideshow_delay_ms = delay_ms
+        sset.slideshow_delay_ms = delay_ms
     timer_start()
     touch.register_callback_left(inc_and_show)
     touch.register_callback_right(dec_and_show)
@@ -102,32 +115,32 @@ def stop():
     timer_stop()
 
 def show_label(label):
-    global _label_y, d, icons
+    global sset, icons
 
-    d.pen(15)
+    sset.d.pen(15)
 
     id = icons.get_id_from_name(label)
     print("Label:", label, "ID:", id)
     if id != None:
         icons.write(id)
     else:
-        d.font("sans")
+        sset.d.font("sans")
         scale = 1
-        d.thickness(3)
-        d.text(label, 0, _label_y, scale)
+        sset.d.thickness(3)
+        sset.d.text(label, 0, sset.label_y, scale)
 
 
 def page_tracker_inc():
-    global _page_tracker, _pages
-    _page_tracker += 1
-    if _page_tracker >= len(_pages):
-        _page_tracker = 0
+    global sset
+    sset.page_tracker += 1
+    if sset.page_tracker >= len(sset.pages):
+        sset.page_tracker = 0
 
 def page_tracker_dec():
-    global _page_tracker, _pages
-    _page_tracker -= 1
-    if _page_tracker < 0:
-        _page_tracker = len(_pages)-1
+    global sset
+    sset.page_tracker -= 1
+    if sset.page_tracker < 0:
+        sset.page_tracker = len(sset.pages)-1
 
 def dec_and_show(t=None):
     if not t:
@@ -144,29 +157,28 @@ def inc_and_show(t=None):
     show_page()
 
 def show_page():
-    global _pages, _page_tracker, d
-    if len(_pages) < 1:
+    global sset
+    if len(sset.pages) < 1:
         return
-    p = _pages[_page_tracker]
-    d.pen(0)
-    d.clear()
+    p = sset.pages[sset.page_tracker]
+    sset.d.pen(0)
+    sset.d.clear()
     show_label(p.label)
     fit_text(p.value)
-    d.update()
+    sset.d.update()
 
 def fit_text(text):
-    global _value_y, d
-    d.font("sans")
+    global sset
+    sset.d.font("sans")
     scale = 3
     pixels = 0
     while True:
-        pixels = d.measure_text(text, scale)
+        pixels = sset.d.measure_text(text, scale)
         if pixels > 200:
             scale -= 0.1
         else:
             break
-    d.pen(15)
-    d.thickness(int(3*scale))
-    d.text(text, int((200-pixels)/2), _value_y, scale)
-    d.text(text, int((200-pixels)/2), _value_y, scale)
+    sset.d.pen(15)
+    sset.d.thickness(int(3*scale))
+    sset.d.text(text, int((200-pixels)/2), sset.value_y, scale)
 

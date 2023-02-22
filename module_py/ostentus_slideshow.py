@@ -20,11 +20,13 @@ class SlideshowSettings:
         self.pages = list()
         self.page_tracker = 0
         self.slideshow_tim = machine.Timer()
-        self.partial_update_tim = machine.Timer()
         self.full_update_pending = False
-        self.partial_update_pending = False
+        self.last_shown_value = None
 
         self.d = badger2040.Badger2040()
+
+    def get_page_value(self):
+        return self.pages[self.page_tracker].value
 
 sset = SlideshowSettings()
 
@@ -65,7 +67,7 @@ class slide_page:
     def get_label(self):
         return self.label
 
-    def get_value(self):
+    def get_page_value(self):
         return self.value
 
     def set(self, value):
@@ -117,7 +119,6 @@ def stop():
     touch.stop()
     timer_stop()
     sset.full_update_pending = False
-    sset.partial_update_pending = False
 
 def show_label(label):
     global sset, icons
@@ -158,12 +159,22 @@ def full_update_flag_set(t=None):
     global sset
     sset.full_update_pending = True
 
+def show_value_partial_update():
+    global sset
+    sset.d.pen(0)
+    sset.d.rectangle(0, sset.value_y-50, 200, 100)
+    fit_text(sset.get_page_value())
+    sset.d.partial_update(0, sset.value_y-50, 200, 100)
+
 def service_slideshow():
     global sset
-    if (sset.full_update_pending):
+    if sset.full_update_pending:
         sset.full_update_pending = False
-        sset.partial_update_pending = False
         inc_and_show()
+    elif sset.last_shown_value is not None:
+        if sset.get_page_value() is not sset.last_shown_value:
+            sset.last_shown_value = sset.get_page_value()
+            show_value_partial_update()
 
 def inc_and_show(t=None):
     if not t:
@@ -181,6 +192,7 @@ def show_page():
     sset.d.clear()
     show_label(p.label)
     fit_text(p.value)
+    sset.last_shown_value = p.value
     sset.d.update()
 
 def fit_text(text):

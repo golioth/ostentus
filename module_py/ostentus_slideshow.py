@@ -1,6 +1,7 @@
 import machine
 import badger2040
 import ostentus_icons
+import ostentus_leds
 from micropython import const
 import cap_touch as touch
 
@@ -23,10 +24,23 @@ class SlideshowSettings:
         self.full_update_pending = False
         self.last_shown_value = None
 
+        self.touch_left_pending = False
+        self.touch_right_pending = False
+        self.touch_up_pending = False
+
         self.d = badger2040.Badger2040()
+        self.leds = ostentus_leds.o_leds()
 
     def get_page_value(self):
         return self.pages[self.page_tracker].value
+
+    def clear_flags(self):
+        global sset
+        sset.full_update_pending = False
+        sset.touch_right_pending = False
+        sset.touch_left_pending = False
+        sset.touch_up_pending = False
+
 
 sset = SlideshowSettings()
 
@@ -109,10 +123,25 @@ def start(delay_ms):
     if (delay_ms >= 6000):
         sset.slideshow_delay_ms = delay_ms
     timer_start()
-    touch.register_callback_left(inc_and_show)
-    touch.register_callback_right(dec_and_show)
+    touch.register_callback_left(touch_left)
+    touch.register_callback_right(touch_right)
     touch.start()
     show_page()
+
+def touch_left(t=None):
+    global sset
+    sset.touch_left_pending = True
+    sset.leds.user(1)
+
+def touch_right(t=None):
+    global sset
+    sset.touch_right_pending = True
+    sset.leds.user(1)
+
+def touch_up(t=None):
+    global sset
+    sset.touch_up_pending = True
+    sset.leds.user(1)
 
 def stop():
     global sset
@@ -168,9 +197,21 @@ def show_value_partial_update():
 
 def service_slideshow():
     global sset
-    if sset.full_update_pending:
-        sset.full_update_pending = False
+    #These statements are in order by priority
+    if sset.touch_right_pending:
         inc_and_show()
+        sset.leds.user(0)
+        sset.clear_flags()
+    elif sset.touch_left_pending:
+        dec_and_show()
+        sset.leds.user(0)
+        sset.clear_flags()
+    elif sset.touch_up_pending:
+        #Currently not used
+        sset.clear_flags()
+    elif sset.full_update_pending:
+        inc_and_show()
+        sset.clear_flags()
     elif sset.last_shown_value is not None:
         if sset.get_page_value() is not sset.last_shown_value:
             sset.last_shown_value = sset.get_page_value()

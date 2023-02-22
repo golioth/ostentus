@@ -35,9 +35,9 @@ class o_leds:
 
     def user(self, state):
         if state == 0:
-            self.user_icon.value(0)
-        else:
             self.user_icon.value(1)
+        else:
+            self.user_icon.value(0)
 
     def process_bitmask(self, bitmask):
         if (bitmask & 1):

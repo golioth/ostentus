@@ -6,3 +6,6 @@
 	path = submodules/micropython
 	url = git@github.com:micropython/micropython.git
 	ignore = dirty
+[submodule "libostentus"]
+	path = libostentus
+	url = git@github.com:golioth/libostentus.git

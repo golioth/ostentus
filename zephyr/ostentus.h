@@ -3,6 +3,12 @@
 #include <zephyr/drivers/i2c.h>
 #include <zephyr/device.h>
 
+#define LED_USE 0x01
+#define LED_GOL 0x02
+#define LED_INT 0x04
+#define LED_BAT 0x08
+#define LED_POW 0x10
+
 int clear_memory(void);
 int show_splash(void);
 int update_display(void);

@@ -5,21 +5,18 @@ Reference Designs.
 
 ## Installation
 
-Load [version 1.19.10 of the Badger2040 micropython
-build](https://github.com/pimoroni/pimoroni-pico/releases/tag/v1.19.10). The
-badge will enumerate as USB mass storage when the Boot button is held while
-reset is pressed and released. Copy the python file onto the drive and it will
-automatically flash and reboot.
+Work in Progress
 
-Use Thonny to put the i2cperipheral.mpy and ostentus.py files on the Badger.
-When issuing the following command, the Badger will return `Listening...` to
-indicate the i2c-peripheral is running:
-
-```
-import ostentus
-```
+Precompiled .uf2 binaries can be found in the Releases section. Please follow
+the [Build with Docker](build-with-docker.md) guide for building the Ostentus
+binary.
 
 ## Controlling Ostentus
+
+It is recommended that you use the libostentus library to control Ostentus from
+Zephyr. (This is included as [a submodule of this repo](libostentus).) Add [the
+libostentus repo](https://github.com/golioth/libostentus) to your Zephyr project
+as a submodule.
 
 Use any i2c-controller to write to the display on device-address 0x12.
 

@@ -36,12 +36,55 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 
 const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(click_i2c));
 
+bool _uninitialized = true;
+bool _is_present = false;
+
 #define BUF_SIZE 48
 uint8_t _ostentus_buf[BUF_SIZE];
 
+
+/**
+ * @brief Confirm that the Ostentus board is present
+ *
+ * This function tests to see if the Ostentus board is present by issuing the
+ * command to erase memory. If the device is not present to receive the command,
+ * the global _is_present will be set to false and all subsequent operations
+ * will not try to write to the i2c bus.
+ *
+ * This function may be run explicitly, or it will be run auotmatically upon the
+ * first attempt to write to i2c if the _uninitialized varible is set to true.
+ *
+ * @return the new value of _is_present
+ */
+bool ostentus_i2c_init(void) {
+	_uninitialized = false;
+
+	_ostentus_buf[0] = 0x00;
+	int err = i2c_write(i2c_dev, _ostentus_buf, 1, OSTENTUS_ADDR);
+	if (err) {
+		LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
+		LOG_DBG("All future calls to Ostentus functions will not be sent.");
+		_is_present = false;
+	}
+	else {
+		LOG_INF("Ostentus present at i2c address: 0x%02X", OSTENTUS_ADDR);
+		_is_present = true;
+	}
+	return _is_present;
+}
+
 int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
+	if (_uninitialized) {
+		ostentus_i2c_init();
+	}
+
+	if (_is_present == false) {
+		LOG_DBG("Ostentus not present, command not sent.");
+		return -EFAULT;
+	}
+
 	_ostentus_buf[0] = reg;
-	LOG_HEXDUMP_DBG(_ostentus_buf, data_len+1, "sending packet");
+	//LOG_HEXDUMP_DBG(_ostentus_buf, data_len+1, "sending packet");
 	return i2c_write(i2c_dev, _ostentus_buf, data_len+1, OSTENTUS_ADDR);
 }
 

@@ -3,7 +3,6 @@
 git submodule update --init
 cd submodules/pimoroni-pico
 git submodule update --init
-git apply ../../patches/pimoroni-pico_1.19.10.patch
 cd ..
 cd micropython
 git submodule update --init -- lib/pico-sdk lib/tinyusb

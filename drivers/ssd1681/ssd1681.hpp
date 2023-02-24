@@ -204,6 +204,8 @@ namespace pimoroni {
     uint8_t update_speed();
     uint32_t update_time();
     void update(bool blocking = true);
+    void partial_update_data(int x, int y, int w, int h, bool blocking = true);
+    void partial_update_execute();
     void partial_update(int x, int y, int w, int h, bool blocking = true);
     void off();
 

@@ -169,7 +169,7 @@ namespace pimoroni {
     }
   }
 
-  void SSD1681::partial_update(int x, int y, int w, int h, bool blocking) {
+  void SSD1681::partial_update_data(int x, int y, int w, int h, bool blocking) {
     if(blocking) {
       busy_wait();
     }
@@ -214,10 +214,18 @@ namespace pimoroni {
       int sy = y1;
       data(cols, &frame_buffer[sy + (sx * (height / 8))]);
     }
+  }
 
+  void SSD1681::partial_update_execute() {
+    busy_wait();
     command(0x22, {0xFF});
     command(0x20);
     busy_wait();
+  }
+
+  void SSD1681::partial_update(int x, int y, int w, int h, bool blocking) {
+    partial_update_data(x, y, w, h, blocking);
+    partial_update_execute();
   }
 
   void SSD1681::update(bool blocking) {

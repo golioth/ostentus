@@ -24,12 +24,18 @@ class SlideshowSettings:
         self.full_update_pending = False
         self.last_shown_value = None
 
+        self.summary_title = "Golioth"
+        self.summary_y = (26, 86, 146) #Y coord for each of 3 summary blocks
+
         self.touch_left_pending = False
         self.touch_right_pending = False
         self.touch_up_pending = False
 
         self.d = badger2040.Badger2040()
         self.leds = ostentus_leds.o_leds()
+
+    def get_page_count(self):
+        return len(self.pages)
 
     def get_page_value(self):
         return self.pages[self.page_tracker].value
@@ -251,3 +257,103 @@ def fit_text(text):
     sset.d.thickness(int(3*scale))
     sset.d.text(text, int((200-pixels)/2), sset.value_y, scale)
 
+def summary_title_set(new_title):
+    global sset
+    sset.summary_title = new_title
+
+def summary(full_update=True):
+    global sset
+    top_text = "Golioth"
+    d_width = 200
+    page_cnt = sset.get_page_count()
+
+    if page_cnt < 1:
+        return;
+
+    if full_update:
+        sset.d.pen(0)
+        sset.d.clear()
+        sset.d.font("sans")
+        sset.d.thickness(2)
+        sset.d.pen(15)
+        sset.d.rectangle(0,0,d_width,24)
+        sset.d.pen(0)
+        tt_offset = int((d_width - sset.d.measure_text(sset.summary_title, 0.9)) / 2)
+        sset.d.text(sset.summary_title, tt_offset, 12, 0.9)
+
+    if full_update:
+        for i in range(3):
+            if i >= page_cnt:
+                break;
+
+            summary_block_data( \
+                    sset.pages[i].label, \
+                    sset.pages[i].value, \
+                    0, \
+                    sset.summary_y[i])
+        sset.d.update()
+
+    else:
+        for i in range(3):
+            if i >= page_cnt:
+                break;
+
+            summary_block_update_value( \
+                    sset.pages[i].value, \
+                    0, \
+                    sset.summary_y[i])
+        sset.d.partial_update_execute()
+
+def summary_partial_update():
+    summary(False)
+
+def summary_block_data(label, value, x, y):
+    """Write a label and value to ePaper memory
+
+    Write a smaller label text with x,y as the upper left corner, with a larger
+    value text below it. This function does not call the screen update command.
+    """
+
+    global sset
+    sset.d.pen(15)
+    sset.d.font("sans")
+    sset.d.thickness(2)
+    sset.d.text(label, x, y+14, 0.7)
+    sset.d.thickness(3)
+    sset.d.text(value, x, y+42, 1)
+
+def summary_block_update_value(value, x, y):
+    """Write a new value to ePaper memory in preparation for a partial update
+
+    Clearn the value in ePaper memory and write a new value. The value is
+    written at the offset established with the summary_block() method. This
+    method does not call the display update command and should be used to pepare
+    the display for a partial update. If several values are being updated, they
+    all must be rewritten to memory using this command between each partial
+    update command.
+    """
+
+    global sset
+    # Design values
+    y_offset = 28
+    height = 38
+    value_offset = 42
+    screen_height = 200
+    screen_width = 200
+
+    # Calculated values (NO EDITS!)
+    y_start = y + y_offset
+    if y_start + height > screen_height:
+        height = screen_height-(y_start)
+    value_start = y + value_offset
+
+    #Partial update y,h must be multiples of 8
+    partial_start = y_start - (y_start % 8)
+    partial_height = height + (y_start - partial_start)
+    partial_height = height + (8 - (height % 8))
+
+    sset.d.pen(0)
+    sset.d.rectangle(0, y_start, screen_width, height)
+    sset.d.pen(15)
+    sset.d.text(value, x, value_start, 1)
+    sset.d.partial_update_data(0, partial_start, screen_width, partial_height)

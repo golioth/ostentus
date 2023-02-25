@@ -28,8 +28,9 @@ class SlideshowSettings:
         self.summary_last_displayed = None
         self.summary_title = "Golioth"
         self.summary_y = (26, 86, 146) #Y coord for each of 3 summary blocks
-        self.summary_p_update_count = 0;
+        self.summary_p_update_count = 0
         self.summary_full_update_after_X_partials = 10
+        self.summary_update_tim = machine.Timer()
 
         self.touch_left_pending = False
         self.touch_right_pending = False
@@ -39,7 +40,7 @@ class SlideshowSettings:
         self.leds = ostentus_leds.o_leds()
 
     def summary_remember_last_values(self):
-        self.summary_last_displayed = [x.value for x in self.pages[:3]
+        self.summary_last_displayed = [x.value for x in self.pages[:3]]
 
     def summary_values_are_new(self):
         return self.summary_last_displayed == [x.value for x in self.pages[:3]]
@@ -231,7 +232,7 @@ def service_slideshow():
         sset.leds.user(0)
         sset.clear_flags()
     elif sset.touch_up_pending:
-        #Currently not used
+        #Toggle the summary view
         if (sset.summary_flag_get()):
             sset.summary_flag_set(False)
             inc_and_show()
@@ -241,15 +242,19 @@ def service_slideshow():
             summary()
         sset.leds.user(0)
         sset.clear_flags()
-    elif sset.full_update_pending:
-        if sset.summary_flag_get():
-            summary(sset.summary_p_update_count >= sset.summary_full_update_after_X_partials)
-        else:
-            inc_and_show()
-        sset.clear_flags()
     elif sset.summary_flag_get():
         if sset.summary_values_are_new():
-            summary_partial_update()
+            #Use a timer for the update so if we have multiple value updates at
+            #there is only one refrash made
+            sset.summary_update_tim.deinit()
+            sset.summary_update_tim.init( \
+                    mode = machine.Timer.ONE_SHOT, \
+                    period = 250, \
+                    callback = summary_timed_update \
+                    )
+    elif sset.full_update_pending:
+        inc_and_show()
+        sset.clear_flags()
     elif sset.last_shown_value is not None:
         if sset.get_page_value() is not sset.last_shown_value:
             sset.last_shown_value = sset.get_page_value()
@@ -344,6 +349,10 @@ def summary(full_update=True):
 
 def summary_partial_update():
     summary(False)
+
+def summary_timed_update(t=None):
+    global sset
+    summary(sset.summary_p_update_count >= sset.summary_full_update_after_X_partials)
 
 def summary_block_data(label, value, x, y):
     """Write a label and value to ePaper memory

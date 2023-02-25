@@ -24,6 +24,7 @@ class SlideshowSettings:
         self.full_update_pending = False
         self.last_shown_value = None
 
+        self.summary_flag = False
         self.summary_title = "Golioth"
         self.summary_y = (26, 86, 146) #Y coord for each of 3 summary blocks
 
@@ -39,6 +40,12 @@ class SlideshowSettings:
 
     def get_page_value(self):
         return self.pages[self.page_tracker].value
+
+    def summary_flag_get():
+        return self.summary_flag
+
+    def summary_flag_set(state):
+        self.summary_flag = True if state else False
 
     def clear_flags(self):
         self.full_update_pending = False

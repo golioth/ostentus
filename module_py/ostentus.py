@@ -213,6 +213,16 @@ class ostentus:
                         slideshow.stop()
                     continue
 
+                # Addr 0x0D: Start/stop slideshow
+                elif regAddress == 0x0D:
+                    if dataLen < 2:
+                        self.print_param_count_err(regAddress, 2, dataLen)
+                        continue
+                    slideshow_title = data[dataStart:dataStart+dataLen]
+                    print("Set summary title to:", slideshow_title)
+                    slideshow.summary_title_set(slideshow_title)
+                    continue
+
                 # == These address are now processed in the C interrupt ==
                 # Addr 0x10..0x14: set/clear LEDs
                 # Addr 0x18 set/clear LEDs from bitmask

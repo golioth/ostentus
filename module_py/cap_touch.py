@@ -21,7 +21,7 @@ debounce_tim = machine.Timer()
 
 touch_callback_left = None
 touch_callback_right = None
-touch_callback_top = None
+touch_callback_up = None
 
 def i2c_get_state():
     try:
@@ -46,10 +46,10 @@ def register_callback_right(method_to_run):
     if is_valid_callback(method_to_run):
         touch_callback_right = method_to_run
 
-def register_callback_top(method_to_run):
-    global touch_callback_top
+def register_callback_up(method_to_run):
+    global touch_callback_up
     if is_valid_callback(method_to_run):
-        touch_callback_top = method_to_run
+        touch_callback_up = method_to_run
 
 def is_valid_callback(method_to_run):
     if not callable(method_to_run):
@@ -58,21 +58,21 @@ def is_valid_callback(method_to_run):
     return True
 
 def irq_handler(pin):
-    global touch_callback_left, touch_callback_right, touch_callback_top
+    global touch_callback_left, touch_callback_right, touch_callback_up
     state = i2c_get_state()
     debounce_tim.init(mode=machine.Timer.ONE_SHOT, period=DEBOUNCE_MS, callback=i2c_clear_int)
 
     # FIXME: these are blocking calls (from an irq)
     if state[0] == 0x01 and touch_callback_left:
         touch_callback_left()
-    if state[0] == 0x02 and touch_callback_top:
-        touch_callback_top()
+    if state[0] == 0x02 and touch_callback_up:
+        touch_callback_up()
     if state[0] == 0x04 and touch_callback_right:
         touch_callback_right()
 
 def start():
     global touch_callback
-    if not touch_callback_left and not touch_callback_top and not touch_callback_right:
+    if not touch_callback_left and not touch_callback_up and not touch_callback_right:
         print("cap_touch: Error starting, please register a callback first")
         return
     i2c_clear_int()

@@ -27,6 +27,8 @@ class SlideshowSettings:
         self.summary_flag = False
         self.summary_title = "Golioth"
         self.summary_y = (26, 86, 146) #Y coord for each of 3 summary blocks
+        self.summary_p_update_count = 0;
+        self.summary_full_update_after_X_partials = 10
 
         self.touch_left_pending = False
         self.touch_right_pending = False
@@ -41,10 +43,10 @@ class SlideshowSettings:
     def get_page_value(self):
         return self.pages[self.page_tracker].value
 
-    def summary_flag_get():
+    def summary_flag_get(self):
         return self.summary_flag
 
-    def summary_flag_set(state):
+    def summary_flag_set(self, state):
         self.summary_flag = True if state else False
 
     def clear_flags(self):
@@ -135,6 +137,7 @@ def start(delay_ms):
     if (delay_ms >= 6000):
         sset.slideshow_delay_ms = delay_ms
     timer_start()
+    touch.register_callback_up(touch_up)
     touch.register_callback_left(touch_left)
     touch.register_callback_right(touch_right)
     touch.start()
@@ -211,23 +214,39 @@ def service_slideshow():
     global sset
     #These statements are in order by priority
     if sset.touch_right_pending:
+        sset.summary_flag_set(False)
         inc_and_show()
         sset.leds.user(0)
         sset.clear_flags()
     elif sset.touch_left_pending:
+        sset.summary_flag_set(False)
         dec_and_show()
         sset.leds.user(0)
         sset.clear_flags()
     elif sset.touch_up_pending:
         #Currently not used
+        if (sset.summary_flag_get()):
+            sset.summary_flag_set(False)
+            inc_and_show()
+            pass
+        else:
+            sset.summary_flag_set(True)
+            summary()
+        sset.leds.user(0)
         sset.clear_flags()
     elif sset.full_update_pending:
-        inc_and_show()
+        if sset.summary_flag_get():
+            summary(sset.summary_p_update_count >= sset.summary_full_update_after_X_partials)
+        else:
+            inc_and_show()
         sset.clear_flags()
     elif sset.last_shown_value is not None:
         if sset.get_page_value() is not sset.last_shown_value:
             sset.last_shown_value = sset.get_page_value()
-            show_value_partial_update()
+            if (sset.summary_flag_get()):
+                summary_partial_update()
+            else:
+                show_value_partial_update()
 
 def inc_and_show(t=None):
     if not t:
@@ -292,6 +311,8 @@ def summary(full_update=True):
             if i >= page_cnt:
                 break;
 
+            sset.summary_p_update_count = 0
+
             summary_block_data( \
                     sset.pages[i].label, \
                     sset.pages[i].value, \
@@ -303,6 +324,8 @@ def summary(full_update=True):
         for i in range(3):
             if i >= page_cnt:
                 break;
+
+            sset.summary_p_update_count += 1
 
             summary_block_update_value( \
                     sset.pages[i].value, \

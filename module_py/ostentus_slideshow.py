@@ -25,6 +25,7 @@ class SlideshowSettings:
         self.last_shown_value = None
 
         self.summary_flag = False
+        self.summary_last_displayed = None
         self.summary_title = "Golioth"
         self.summary_y = (26, 86, 146) #Y coord for each of 3 summary blocks
         self.summary_p_update_count = 0;
@@ -36,6 +37,12 @@ class SlideshowSettings:
 
         self.d = badger2040.Badger2040()
         self.leds = ostentus_leds.o_leds()
+
+    def summary_remember_last_values(self):
+        self.summary_last_displayed = [x.value for x in self.pages[:3]
+
+    def summary_values_are_new(self):
+        return self.summary_last_displayed == [x.value for x in self.pages[:3]]
 
     def get_page_count(self):
         return len(self.pages)
@@ -240,13 +247,13 @@ def service_slideshow():
         else:
             inc_and_show()
         sset.clear_flags()
+    elif sset.summary_flag_get():
+        if sset.summary_values_are_new():
+            summary_partial_update()
     elif sset.last_shown_value is not None:
         if sset.get_page_value() is not sset.last_shown_value:
             sset.last_shown_value = sset.get_page_value()
-            if (sset.summary_flag_get()):
-                summary_partial_update()
-            else:
-                show_value_partial_update()
+            show_value_partial_update()
 
 def inc_and_show(t=None):
     if not t:
@@ -319,6 +326,7 @@ def summary(full_update=True):
                     0, \
                     sset.summary_y[i])
         sset.d.update()
+        sset.summary_remember_last_values()
 
     else:
         for i in range(3):
@@ -332,6 +340,7 @@ def summary(full_update=True):
                     0, \
                     sset.summary_y[i])
         sset.d.partial_update_execute()
+        sset.summary_remember_last_values()
 
 def summary_partial_update():
     summary(False)

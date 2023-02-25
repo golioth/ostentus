@@ -41,11 +41,10 @@ class SlideshowSettings:
         return self.pages[self.page_tracker].value
 
     def clear_flags(self):
-        global sset
-        sset.full_update_pending = False
-        sset.touch_right_pending = False
-        sset.touch_left_pending = False
-        sset.touch_up_pending = False
+        self.full_update_pending = False
+        self.touch_right_pending = False
+        self.touch_left_pending = False
+        self.touch_up_pending = False
 
 
 sset = SlideshowSettings()

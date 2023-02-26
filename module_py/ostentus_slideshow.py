@@ -29,7 +29,7 @@ class SlideshowSettings:
         self.summary_title = "Golioth"
         self.summary_y = (26, 86, 146) #Y coord for each of 3 summary blocks
         self.summary_p_update_count = 0
-        self.summary_full_update_after_X_partials = 6
+        self.summary_full_update_after_X_partials = 20
         self.summary_update_tim = machine.Timer()
         self.summary_data_is_new = False
 

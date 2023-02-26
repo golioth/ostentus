@@ -56,6 +56,7 @@ class SlideshowSettings:
 
     def summary_flag_set(self, state):
         self.summary_flag = True if state else False
+        print("Set summary_flag to:", self.summary_flag_get())
 
     def clear_flags(self):
         self.full_update_pending = False
@@ -211,6 +212,11 @@ def full_update_flag_set(t=None):
     global sset
     sset.full_update_pending = True
 
+def stop_summary():
+    global sset
+    sset.summary_flag_set(False)
+    sset.summary_update_tim.deinit()
+
 def show_value_partial_update():
     global sset
     sset.d.pen(0)
@@ -222,19 +228,19 @@ def service_slideshow():
     global sset
     #These statements are in order by priority
     if sset.touch_right_pending:
-        sset.summary_flag_set(False)
+        stop_summary()
         inc_and_show()
         sset.leds.user(0)
         sset.clear_flags()
     elif sset.touch_left_pending:
-        sset.summary_flag_set(False)
+        stop_summary()
         dec_and_show()
         sset.leds.user(0)
         sset.clear_flags()
     elif sset.touch_up_pending:
         #Toggle the summary view
         if (sset.summary_flag_get()):
-            sset.summary_flag_set(False)
+            stop_summary()
             inc_and_show()
             pass
         else:

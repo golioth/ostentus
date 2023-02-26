@@ -173,6 +173,7 @@ namespace pimoroni {
     if(blocking) {
       busy_wait();
     }
+    reset();
 
     int cols = h / 8;
     int y1 = y / 8;

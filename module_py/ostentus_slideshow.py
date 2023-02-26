@@ -25,12 +25,13 @@ class SlideshowSettings:
         self.last_shown_value = None
 
         self.summary_flag = False
-        self.summary_last_displayed = None
+        self.summary_update_pending = True
         self.summary_title = "Golioth"
         self.summary_y = (26, 86, 146) #Y coord for each of 3 summary blocks
         self.summary_p_update_count = 0
-        self.summary_full_update_after_X_partials = 10
+        self.summary_full_update_after_X_partials = 6
         self.summary_update_tim = machine.Timer()
+        self.summary_data_is_new = False
 
         self.touch_left_pending = False
         self.touch_right_pending = False
@@ -43,7 +44,8 @@ class SlideshowSettings:
         self.summary_last_displayed = [x.value for x in self.pages[:3]]
 
     def summary_values_are_new(self):
-        return self.summary_last_displayed == [x.value for x in self.pages[:3]]
+        values_are_the_same = self.summary_last_displayed == [x.value for x in self.pages[:3]]
+        return not values_are_the_same
 
     def get_page_count(self):
         return len(self.pages)
@@ -63,6 +65,7 @@ class SlideshowSettings:
         self.touch_right_pending = False
         self.touch_left_pending = False
         self.touch_up_pending = False
+        self.summary_update_pending = False
 
 
 sset = SlideshowSettings()
@@ -123,9 +126,11 @@ def add(s_id, label):
 
 def set_value_by_id(s_id, value):
     global sset
-    for p in sset.pages:
+    for i,p in enumerate(sset.pages):
         if p.s_id == s_id:
             p.value = value
+            if i < 3:
+                sset.summary_data_is_new = True
 
 def timer_start():
     global sset
@@ -239,25 +244,30 @@ def service_slideshow():
         sset.clear_flags()
     elif sset.touch_up_pending:
         #Toggle the summary view
+        sset.leds.user(1)
         if (sset.summary_flag_get()):
             stop_summary()
             inc_and_show()
             pass
         else:
             sset.summary_flag_set(True)
+            sset.summary_data_is_new = False
             summary()
+        sset.clear_flags()
         sset.leds.user(0)
+    elif sset.summary_update_pending:
+        summary(sset.summary_p_update_count >= sset.summary_full_update_after_X_partials)
         sset.clear_flags()
     elif sset.summary_flag_get():
-        if sset.summary_values_are_new():
+        if sset.summary_data_is_new:
             #Use a timer for the update so if we have multiple value updates at
-            #there is only one refrash made
-            sset.summary_update_tim.deinit()
+            #there is only one refresh made
             sset.summary_update_tim.init( \
                     mode = machine.Timer.ONE_SHOT, \
-                    period = 250, \
+                    period = 100, \
                     callback = summary_timed_update \
                     )
+            sset.summary_data_is_new = False
     elif sset.full_update_pending:
         inc_and_show()
         sset.clear_flags()
@@ -329,29 +339,28 @@ def summary(full_update=True):
             if i >= page_cnt:
                 break;
 
-            sset.summary_p_update_count = 0
-
             summary_block_data( \
                     sset.pages[i].label, \
                     sset.pages[i].value, \
                     0, \
                     sset.summary_y[i])
+        sset.summary_p_update_count = 0
         sset.d.update()
-        sset.summary_remember_last_values()
 
     else:
         for i in range(3):
             if i >= page_cnt:
                 break;
 
-            sset.summary_p_update_count += 1
-
             summary_block_update_value( \
                     sset.pages[i].value, \
                     0, \
                     sset.summary_y[i])
+
+        sset.summary_p_update_count += 1
         sset.d.partial_update_execute()
-        sset.summary_remember_last_values()
+
+    print("Summary update called:", sset.summary_p_update_count)
 
 def summary_partial_update():
     summary(False)
@@ -378,7 +387,7 @@ def summary_block_data(label, value, x, y):
 def summary_block_update_value(value, x, y):
     """Write a new value to ePaper memory in preparation for a partial update
 
-    Clearn the value in ePaper memory and write a new value. The value is
+    Clear the value in ePaper memory and write a new value. The value is
     written at the offset established with the summary_block() method. This
     method does not call the display update command and should be used to pepare
     the display for a partial update. If several values are being updated, they

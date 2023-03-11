@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include "i2c_fifo.h"
 #include "i2c_multi.h"
 #include "led_ctrl.h"
 #include "pico/stdlib.h"
@@ -71,9 +72,7 @@ void i2c_request_handler(uint8_t address)
     switch (address)
     {
     case OSTENTUS_ADDR:
-        buffer[0] = 0x10;
-        buffer[1] = 0x11;
-        buffer[2] = 0x12;
+        snprintf((char *)buffer, sizeof(buffer), "%s", OSTENTUS_VERSION);
         break;
     }
 }

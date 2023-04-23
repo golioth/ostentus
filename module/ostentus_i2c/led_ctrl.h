@@ -3,6 +3,7 @@
 
 // These should match the register address here:
 // https://github.com/golioth/ostentus/blob/8b73f306b55f31b6a26226b7cdb5381ca2dc138f/zephyr/ostentus.c#L23-L28
+#define ADDR_RESET 0xB5
 #define ADDR_POWER 0x14
 #define ADDR_BATTERY 0x13
 #define ADDR_INTERNET 0x12

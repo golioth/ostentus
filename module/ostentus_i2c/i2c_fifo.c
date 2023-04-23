@@ -6,6 +6,7 @@
 #include "i2c_multi.h"
 #include "led_ctrl.h"
 #include "pico/stdlib.h"
+#include "hardware/watchdog.h"
 
 #define OSTENTUS_ADDR 0x12
 
@@ -69,6 +70,8 @@ void i2c_request_handler(uint8_t address)
 {
     printf("\nAddress: %X, request...", address);
 
+    buffer[0] = 1; buffer[1] = 2; buffer[2] = 3;
+    return;
     switch (address)
     {
     case OSTENTUS_ADDR:
@@ -83,6 +86,9 @@ void i2c_stop_handler(uint8_t length)
     _fifo[_fs.tail].len = _fs.idx;
 
     switch(_fifo[_fs.tail].reg) {
+        case ADDR_RESET:
+            watchdog_reboot(0, SRAM_END, 10);
+            break;
         // Handle LED change directly (don't save to fifo)
         case ADDR_POWER:
             if (_fifo[_fs.tail].len) {

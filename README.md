@@ -5,11 +5,41 @@ Reference Designs.
 
 ## Installation
 
-Work in Progress
+Precompiled .uf2 binaries can be found in the Releases section.
 
-Precompiled .uf2 binaries can be found in the Releases section. Please follow
-the [Build with Docker](build-with-docker.md) guide for building the Ostentus
-binary.
+
+### Building firmware
+
+Micropython has known issues building with some CMake version. This repository
+includes a Dockerfile that will install a known-working build environment.
+Installation and use of the Docker container has been simplified as much as
+possible.
+
+1. Install Docker on your system
+
+    ```
+    sudo apt install docker.io
+    sudo usermod -a -G docker mike
+    newgrp docker
+    ```
+
+2. Perform initialization of the Docker image/container
+
+    ```
+    make docker_init
+    ```
+
+3. Build firmware
+
+    ```
+    make
+    ```
+
+The result of running `make` is a firmware.uf2 file in the root dirctory of this
+repository that can be flashed onto the Pico.
+
+If you encounter issues using this approach, please consult the [Build with
+Docker](build-with-docker.md) guide for building the Ostentus binary.
 
 ## Controlling Ostentus
 

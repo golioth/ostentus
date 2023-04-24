@@ -53,7 +53,7 @@ docker run -dt \
 ostentus_build
 ```
 
-### Build the Micropythong Cross Compiler
+### Build the Micropython Cross Compiler
 
 ```shell
 docker exec -w /ostentus/submodules/micropython ostentus make -C mpy-cross

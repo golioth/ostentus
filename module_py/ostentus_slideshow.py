@@ -210,7 +210,7 @@ def dec_and_show(t=None):
     if not t:
         timer_stop()
         timer_start()
-    page_tracker_inc()
+    page_tracker_dec()
     show_page()
 
 def full_update_flag_set(t=None):

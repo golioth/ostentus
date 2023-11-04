@@ -18,6 +18,6 @@ typedef union {
 
 void finalize_samples(void);
 void init_samples(char *name, uint16_t interval_us);
-int put_point(Point p);
+int put_point(uint8_t x, uint8_t y);
 
 #endif

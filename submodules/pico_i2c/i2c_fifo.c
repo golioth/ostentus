@@ -4,7 +4,7 @@
 #include <string.h>
 #include <hardware/i2c.h>
 #include "../micropython/lib/pico-sdk/src/rp2_common/pico_i2c_slave/include/pico/i2c_slave.h"
-#include "led_ctrl.h"
+//#include "led_ctrl.h"
 #include "pico/stdlib.h"
 #include "i2c_fifo.h"
 #include "supercon_data_transfer.h"
@@ -15,8 +15,9 @@ uint8_t _semver[3] = { 1, 2, 3 };
 #define REG_GETDATA 0xE1
 
 #define OSTENTUS_ADDR 0x12
-#define OSTENTUS_SDA_PIN 0
-#define OSTENTUS_SCL_PIN 1
+#define OSTENTUS_I2C_PORT i2c1
+#define OSTENTUS_SDA_PIN 14
+#define OSTENTUS_SCL_PIN 15
 #define OSTENTUS_BAUDRATE 100000 // 100 kHz
 
 uint8_t buffer[I2C_BUFFER_SIZE] = {0};
@@ -235,7 +236,7 @@ void fifo_init(void)
 {
     reset_ctx();
 
-    led_init();
+    //led_init();
 
     gpio_init(OSTENTUS_SDA_PIN);
     gpio_set_function(OSTENTUS_SDA_PIN, GPIO_FUNC_I2C);
@@ -245,7 +246,7 @@ void fifo_init(void)
     gpio_set_function(OSTENTUS_SCL_PIN, GPIO_FUNC_I2C);
     gpio_pull_up(OSTENTUS_SCL_PIN);
 
-    i2c_init(i2c0, OSTENTUS_BAUDRATE);
+    i2c_init(OSTENTUS_I2C_PORT, OSTENTUS_BAUDRATE);
     // configure I2C0 for slave mode
-    i2c_slave_init(i2c0, OSTENTUS_ADDR, &i2c_responder_handler);
+    i2c_slave_init(OSTENTUS_I2C_PORT, OSTENTUS_ADDR, &i2c_responder_handler);
 }

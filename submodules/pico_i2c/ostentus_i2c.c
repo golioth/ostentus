@@ -1,12 +1,34 @@
 // Include MicroPython API.
 #include "py/runtime.h"
 #include "i2c_fifo.h"
+#include "supercon_data_cache.h"
 
 STATIC mp_obj_t init(void) {
     fifo_init();
     return mp_const_none;
 }
 MP_DEFINE_CONST_FUN_OBJ_0(init_obj, init);
+
+STATIC mp_obj_t fifo_finalize_samples(void) {
+    finalize_samples();
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_0(fifo_finalize_samples_obj, fifo_finalize_samples);
+
+STATIC mp_obj_t fifo_put_point(mp_obj_t x_obj, mp_obj_t y_obj) {
+    mp_int_t x = mp_obj_get_int(x_obj);
+    mp_int_t y = mp_obj_get_int(y_obj);
+    put_point(x, y);
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_2(fifo_put_point_obj, fifo_put_point);
+
+
+STATIC mp_obj_t fifo_init_samples(void) {
+    init_samples("Philip J. Fry", 50);
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_0(fifo_init_samples_obj, fifo_init_samples);
 
 STATIC mp_obj_t has_data(void) {
     return mp_obj_new_bool(fifo_has_data());
@@ -31,6 +53,9 @@ MP_DEFINE_CONST_FUN_OBJ_0(pop_obj, pop);
 STATIC const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_ostentus_i2c) },
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&init_obj) },
+    { MP_ROM_QSTR(MP_QSTR_fifo_finalize_samples), MP_ROM_PTR(&fifo_finalize_samples_obj) },
+    { MP_ROM_QSTR(MP_QSTR_fifo_put_point), MP_ROM_PTR(&fifo_put_point_obj) },
+    { MP_ROM_QSTR(MP_QSTR_fifo_init_samples), MP_ROM_PTR(&fifo_init_samples_obj) },
     { MP_ROM_QSTR(MP_QSTR_pop), MP_ROM_PTR(&pop_obj) },
     { MP_ROM_QSTR(MP_QSTR_has_data), MP_ROM_PTR(&has_data_obj) },
 };

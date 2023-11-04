@@ -24,12 +24,17 @@ void init_samples(char *name, uint16_t interval_us) {
     _meta.header.uid = (uint16_t)get_rand_32();
 }
 
-int put_point(Point p) {
+int put_point(uint8_t x, uint8_t y) {
 
     if (sample_cache_is_ready()) {
         /* Buffer is alreay staged for Alduel */
         return -1;
     }
+
+    Point p = {
+      .x = x,
+      .y = y,
+    };
 
     _samples.points[cache_ctx.point_idx] = p;
 

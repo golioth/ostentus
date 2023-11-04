@@ -4,15 +4,15 @@
 # $ docker exec -i ostentus bash < utility/build_firmware.sh
 
 cmake -S . \
-		-B build-$BOARD_TYPE \
+		-B build-RPI_PICO \
 		-DPICO_BUILD_DOCS=0 \
-		-DUSER_C_MODULES=$BADGER_COMPILE_DIR/pimoroni-pico/micropython/modules/badger2040-micropython.cmake \
-		-DMICROPY_BOARD=$BOARD_TYPE \
+    -DUSER_C_MODULES=../../../gc9a01_mpy/src/micropython.cmake \
+		-DMICROPY_BOARD=RPI_PICO \
 		-DCMAKE_C_COMPILER_LAUNCHER=ccache \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
-cmake --build build-PIMORONI_BADGER2040/ -j 2
+cmake --build build-RPI_PICO/ -j 2
 
 #Copy the newly built binary to the repo's root folder:
-cp build-PIMORONI_BADGER2040/firmware.uf2 ../../../../.
+cp build-RPI_PICO/firmware.uf2 ../../../../.
 

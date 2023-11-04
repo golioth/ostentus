@@ -9,3 +9,6 @@
 	path = submodules/pimoroni-pico
 	url = git@github.com:szczys/pimoroni-pico.git
 	ignore = dirty
+[submodule "submodules/gc9a01_mpy"]
+	path = submodules/gc9a01_mpy
+	url = https://github.com/russhughes/gc9a01_mpy.git

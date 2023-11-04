@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 MAINTAINER Mike Szczys mike@golioth.io
 
 ENV BADGER_COMPILE_DIR=/ostentus/submodules
-ENV BOARD_TYPE=PIMORONI_BADGER2040
+ENV BOARD_TYPE=RPI_PICO
 ENV CCACHE_DIR=/tmp/.ccache
 ENV CCACHE_TEMPDIR=/tmp/.ccache
 

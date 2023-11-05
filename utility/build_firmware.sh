@@ -7,7 +7,6 @@ cmake -S . \
 		-B build-RPI_PICO \
 		-DPICO_BUILD_DOCS=0 \
     -DUSER_C_MODULES="../../../gc9a01_mpy/src/micropython.cmake;../../../pico_i2c/micropython.cmake" \
-#    -DUSER_C_MODULES=../../../pico_i2c/micropython.cmake \
 		-DMICROPY_BOARD=RPI_PICO \
 		-DCMAKE_C_COMPILER_LAUNCHER=ccache \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache

@@ -2,6 +2,7 @@
 #include "py/runtime.h"
 #include "i2c_fifo.h"
 #include "supercon_data_cache.h"
+#include "supercon_data_transfer.h"
 
 STATIC mp_obj_t init(void) {
     fifo_init();
@@ -30,6 +31,11 @@ STATIC mp_obj_t fifo_init_samples(void) {
 }
 MP_DEFINE_CONST_FUN_OBJ_0(fifo_init_samples_obj, fifo_init_samples);
 
+STATIC mp_obj_t outgoing_data_available(void) {
+    return mp_obj_new_bool(data_available());
+}
+MP_DEFINE_CONST_FUN_OBJ_0(outgoing_data_available_obj, outgoing_data_available);
+
 STATIC mp_obj_t has_data(void) {
     return mp_obj_new_bool(fifo_has_data());
 }
@@ -56,6 +62,7 @@ STATIC const mp_rom_map_elem_t example_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_fifo_finalize_samples), MP_ROM_PTR(&fifo_finalize_samples_obj) },
     { MP_ROM_QSTR(MP_QSTR_fifo_put_point), MP_ROM_PTR(&fifo_put_point_obj) },
     { MP_ROM_QSTR(MP_QSTR_fifo_init_samples), MP_ROM_PTR(&fifo_init_samples_obj) },
+    { MP_ROM_QSTR(MP_QSTR_outgoing_data_available), MP_ROM_PTR(&outgoing_data_available_obj) },
     { MP_ROM_QSTR(MP_QSTR_pop), MP_ROM_PTR(&pop_obj) },
     { MP_ROM_QSTR(MP_QSTR_has_data), MP_ROM_PTR(&has_data_obj) },
 };

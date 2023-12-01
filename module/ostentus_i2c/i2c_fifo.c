@@ -12,8 +12,9 @@ PIO pio = pio0;
 uint pin = 4;
 #define BUFFER_SIZE 64
 uint8_t buffer[BUFFER_SIZE] = {0};
+bool i2c_multi_disabled = false;
 
-#define FIFO_SIZE 32
+#define FIFO_SIZE 64
 #define FIFO_DATA_OFFSET 2 // cmd addr, data_len
 #define FIFO_DATA_SIZE BUFFER_SIZE-FIFO_DATA_OFFSET
 
@@ -123,7 +124,12 @@ void i2c_stop_handler(uint8_t length)
             if (++_fs.tail >= FIFO_SIZE) {
                 _fs.tail = 0;
             }
-
+            if ((_fs.head == _fs.tail) && _fs.has_data) {
+                // Temporarily disable i2c_multi to prevent receiving and then
+                // silently dropping I2C messages sent while the fifo is full
+                i2c_multi_disable();
+                i2c_multi_disabled = true;
+            }
     }
     //Reset to defaults
     _fs.idx = 0;
@@ -141,6 +147,12 @@ int fifo_pop(uint8_t * r_buf) {
         _fs.head = 0;
     }
     --_fs.has_data;
+    if (i2c_multi_disabled && (_fs.has_data < (FIFO_SIZE - 1))) {
+        // Re-enable i2c_multi now that there is at least one available slot
+        // in the fifo
+        i2c_multi_restart();
+        i2c_multi_disabled = false;
+    }
     return 0;
 }
 

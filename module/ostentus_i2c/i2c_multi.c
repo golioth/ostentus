@@ -10,8 +10,8 @@ static inline void start_condition_program_init(PIO pio, uint sm, uint offset, u
 static inline void stop_condition_program_init(PIO pio, uint sm, uint offset, uint pin);
 static inline void read_byte_program_init(PIO pio, uint sm, uint offset, uint pin);
 static inline void write_byte_program_init(PIO pio, uint sm, uint offset, uint pin);
-static inline void byte_handler_pio();
-static inline void stop_handler_pio();
+static inline void byte_handler_pio(void);
+static inline void stop_handler_pio(void);
 static inline uint8_t transpond_byte(uint8_t byte);
 
 static bool initialized = false;
@@ -100,7 +100,7 @@ void i2c_multi_disable_address(uint8_t address)
     i2c_multi->address[address / 32] &= ~(1 << (address % 32));
 }
 
-void i2c_multi_enable_all_addresses()
+void i2c_multi_enable_all_addresses(void)
 {
     i2c_multi->address[0] = 0xFFFFFFFF;
     i2c_multi->address[1] = 0xFFFFFFFF;
@@ -108,7 +108,7 @@ void i2c_multi_enable_all_addresses()
     i2c_multi->address[3] = 0xFFFFFFFF;
 }
 
-void i2c_multi_disable_all_addresses()
+void i2c_multi_disable_all_addresses(void)
 {
     i2c_multi->address[0] = 0;
     i2c_multi->address[1] = 0;
@@ -121,7 +121,7 @@ bool i2c_multi_is_address_enabled(uint8_t address)
     return i2c_multi->address[address / 32] & (1 << (address % 32));
 }
 
-void i2c_multi_disable()
+void i2c_multi_disable(void)
 {
     pio_sm_set_enabled(i2c_multi->pio, i2c_multi->sm_read, false);
     pio_sm_set_enabled(i2c_multi->pio, i2c_multi->sm_write, false);
@@ -136,7 +136,7 @@ void i2c_multi_disable()
     i2c_multi->buffer = i2c_multi->buffer_start;
 }
 
-void i2c_multi_restart()
+void i2c_multi_restart(void)
 {
     i2c_multi_disable();
     pio_sm_restart(i2c_multi->pio, i2c_multi->sm_start);
@@ -151,7 +151,7 @@ void i2c_multi_restart()
     pio_sm_set_enabled(i2c_multi->pio, i2c_multi->sm_stop, true);
 }
 
-void i2c_multi_remove()
+void i2c_multi_remove(void)
 {
     receive_handler = NULL;
     request_handler = NULL;
@@ -199,7 +199,6 @@ static inline void read_byte_program_init(PIO pio, uint sm, uint offset, uint pi
     pio_sm_config c = read_byte_program_get_default_config(offset);
     sm_config_set_in_pins(&c, pin);
     sm_config_set_clkdiv(&c, 10);
-    sm_config_set_sideset_pins(&c, pin);
     sm_config_set_out_shift(&c, true, true, 32);
     pio_set_irq0_source_enabled(pio, pis_interrupt0, true);
     pio_interrupt_clear(pio, 0);
@@ -222,15 +221,14 @@ static inline void write_byte_program_init(PIO pio, uint sm, uint offset, uint p
     pio_sm_set_enabled(pio, sm, true);
 }
 
-static inline void byte_handler_pio()
+static inline void byte_handler_pio(void)
 {
-    pio_interrupt_clear(i2c_multi->pio, 0);
     uint8_t received = 0;
     bool is_address = false;
     i2c_multi->bytes_count++;
     if (i2c_multi->status != I2C_WRITE)
     {
-        received = pio_sm_get_blocking(i2c_multi->pio, i2c_multi->sm_read);
+        received = transpond_byte(pio_sm_get_blocking(i2c_multi->pio, i2c_multi->sm_read) >> 24); // Do the bit-reverse here as PIO instructions are scarce
     }
     if (i2c_multi->status == I2C_IDLE)
     {
@@ -241,6 +239,7 @@ static inline void byte_handler_pio()
             pio_sm_put_blocking(i2c_multi->pio, i2c_multi->sm_read, (((uint32_t)do_ack_program_instructions[10] + i2c_multi->offset_read) << 16) | do_ack_program_instructions[9]);
             pio_sm_put_blocking(i2c_multi->pio, i2c_multi->sm_read, (((uint32_t)do_ack_program_instructions[1]) << 16) | do_ack_program_instructions[0]);
             pio_sm_put_blocking(i2c_multi->pio, i2c_multi->sm_read, (((uint32_t)do_ack_program_instructions[3]) << 16) | do_ack_program_instructions[2]);
+            pio_interrupt_clear(i2c_multi->pio, 0);
             return;
         }
         if (received & 1)
@@ -302,9 +301,10 @@ static inline void byte_handler_pio()
         pio_sm_put_blocking(i2c_multi->pio, i2c_multi->sm_write, (((uint32_t)wait_ack_program_instructions[1]) << 16) | wait_ack_program_instructions[0]);
         pio_sm_put_blocking(i2c_multi->pio, i2c_multi->sm_write, (((uint32_t)wait_ack_program_instructions[3]) << 16) | wait_ack_program_instructions[2]);
     }
+    pio_interrupt_clear(i2c_multi->pio, 0);
 }
 
-static inline void stop_handler_pio()
+static inline void stop_handler_pio(void)
 {
     pio_interrupt_clear(i2c_multi->pio, 1);
     if (i2c_multi->status == I2C_IDLE)

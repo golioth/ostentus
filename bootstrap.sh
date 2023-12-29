@@ -14,7 +14,6 @@ popd
 # Patch step used by pimoroni-pico
 pushd submodules/micropython/ports/rp2
 ../../../pimoroni-pico/micropython/_board/board-fixup.sh badger2040 /PIMORONI_BADGER2040 ../../../pimoroni-pico/micropython/_board
-git apply ../../../../patches/rp2_pio_c.patch
 make BOARD=PIMORONI_BADGER2040 submodules
 popd
 

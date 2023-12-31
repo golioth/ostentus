@@ -6,6 +6,7 @@
 	docker_image_create docker_image_remove \
 	docker_container_create docker_container_remove \
 	docker_init \
+	clean \
 	all
 
 help:
@@ -63,6 +64,10 @@ docker_init: docker_image_create docker_container_create
 
 # Clear all ostenus Docker files (Stop the container, remove the container, remove the image)
 docker_fullclean: docker_stop docker_container_remove docker_image_remove
+
+# Remove the build directory
+clean:
+	rm -rf submodules/micropython/ports/rp2/build-PIMORONI_BADGER2040
 
 # Start container, build firmware, stop container
 all: docker_start build docker_stop

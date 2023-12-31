@@ -122,32 +122,32 @@ static void process_immediate_or_enqueue(void)
 
     switch(buf->reg) {
         // Handle LED change directly (don't save to fifo)
-        case ADDR_POWER:
+        case OSTENTUS_LED_POW:
             if (buf->len) {
                 led_push_single(LED_POWER, buf->data[0]);
             }
             break;
-        case ADDR_BATTERY:
+        case OSTENTUS_LED_BAT:
             if (buf->len) {
                 led_push_single(LED_BATTERY, buf->data[0]);
             }
             break;
-        case ADDR_INTERNET:
+        case OSTENTUS_LED_INT:
             if (buf->len) {
                 led_push_single(LED_INTERNET, buf->data[0]);
             }
             break;
-        case ADDR_GOLIOTH:
+        case OSTENTUS_LED_GOL:
             if (buf->len) {
                 led_push_single(LED_GOLIOTH, buf->data[0]);
             }
             break;
-        case ADDR_USER:
+        case OSTENTUS_LED_USE:
             if (buf->len) {
                 led_push_single(LED_USER, buf->data[0]);
             }
             break;
-        case ADDR_BITMASK:
+        case OSTENTUS_LED_BITMASK:
             if (buf->len) {
                 led_push_mask(buf->data[0]);
             }

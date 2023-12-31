@@ -73,10 +73,6 @@ static i2c_msg_t *get_tail(void) {
 }
 
 static void store_byte(uint8_t data) {
-    if ((ctx.head == ctx.tail) && ctx.has_data) {
-        //Buffer is full, do nothing.
-        return;
-    }
     if (ctx.state == I2C_IDLE) {
         get_tail()->reg = data;
         switch(data) {
@@ -159,6 +155,10 @@ static void process_immediate_or_enqueue(void)
 
         // Everything else goes into the fifo
         default:
+            if ((ctx.head == ctx.tail) && ctx.has_data) {
+                //Buffer is full, do nothing.
+                return;
+            }
             // Indicate there's info in the fifo
             if (++ctx.has_data > FIFO_SIZE) {
                 ctx.has_data = FIFO_SIZE;

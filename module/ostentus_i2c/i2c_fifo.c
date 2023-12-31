@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <hardware/i2c.h>
+#include <hardware/watchdog.h>
 #include <pico/i2c_slave.h>
 #include <pico/stdlib.h>
 
@@ -83,8 +84,7 @@ static void store_byte(uint8_t data) {
              * address received as a command without any additional data bytes.
              **/
             case OSTENTUS_GET_VERSION:
-            case OSTENTUS_ISREADY:
-            case OSTENTUS_RESET:
+            case OSTENTUS_FIFO_READY:
                 ctx.state = I2C_HAS_READ_ADDR;
                 break;
             default:
@@ -150,6 +150,11 @@ static void process_immediate_or_enqueue(void)
         case OSTENTUS_LED_BITMASK:
             if (buf->len) {
                 led_push_mask(buf->data[0]);
+            }
+            break;
+        case OSTENTUS_RESET:
+            if ((buf->len) && (uint8_t)buf->data[0] == OSTENTUS_RESET_MAGIC) {
+                watchdog_reboot(0, 0, 0);
             }
             break;
 

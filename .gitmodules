@@ -5,7 +5,9 @@
 [submodule "libostentus"]
 	path = libostentus
 	url = git@github.com:golioth/libostentus.git
+[submodule "submodules/badger2040"]
+	path = submodules/badger2040
+	url = https://github.com/pimoroni/badger2040.git
 [submodule "submodules/pimoroni-pico"]
 	path = submodules/pimoroni-pico
-	url = git@github.com:szczys/pimoroni-pico.git
-	ignore = dirty
+	url = https://github.com/pimoroni/pimoroni-pico.git

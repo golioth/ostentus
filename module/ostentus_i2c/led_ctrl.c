@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "led_ctrl.h"
 #include "pico/stdlib.h"
+#include <libostentus_regmap.h>
 
 static const uint32_t LED_MASKS[5] = {
     LED_USER,
@@ -40,4 +41,3 @@ void led_push_single(uint32_t led_bit, uint8_t state) {
         gpio_set_mask(led_bit);
     }
 }
-

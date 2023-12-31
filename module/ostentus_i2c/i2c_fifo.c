@@ -10,7 +10,7 @@
 #include "led_ctrl.h"
 #include <libostentus_regmap.h>
 
-uint8_t _semver[3] = { 1, 2, 3 };
+uint8_t _semver[3] = { VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH };
 
 #define OSTENTUS_ADDR 0x12
 #define OSTENTUS_I2C_PORT i2c0

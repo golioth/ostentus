@@ -73,6 +73,14 @@ static i2c_msg_t *get_tail(void) {
     return &ctx.fifo[ctx.tail];
 }
 
+static uint8_t fifo_slots_remaining(void) {
+    if ((ctx.head == ctx.tail) && (ctx.has_data)) {
+        return 0;
+    } else {
+        return (ctx.tail >= ctx.head) ? FIFO_SIZE - ctx.tail + ctx.head : ctx.head - ctx.tail;
+    }
+}
+
 static void store_byte(uint8_t data) {
     if (ctx.state == I2C_IDLE) {
         get_tail()->reg = data;
@@ -108,6 +116,9 @@ static uint8_t read_byte(void) {
             } else {
                 return 0xff;
             }
+            break;
+        case OSTENTUS_FIFO_READY:
+            return fifo_slots_remaining();
             break;
         default:
             return 0xff;
@@ -160,7 +171,7 @@ static void process_immediate_or_enqueue(void)
 
         // Everything else goes into the fifo
         default:
-            if ((ctx.head == ctx.tail) && ctx.has_data) {
+            if (fifo_slots_remaining() == 0) {
                 //Buffer is full, do nothing.
                 return;
             }

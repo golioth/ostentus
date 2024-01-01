@@ -1,8 +1,8 @@
 diff --git a/drivers/CMakeLists.txt b/drivers/CMakeLists.txt
-index 5c005228..bc25862d 100644
+index d5c9a558..4e5b6e3b 100644
 --- a/drivers/CMakeLists.txt
 +++ b/drivers/CMakeLists.txt
-@@ -30,6 +30,7 @@ add_subdirectory(hub75)
+@@ -31,6 +31,7 @@ add_subdirectory(hub75_legacy)
  add_subdirectory(uc8151)
  add_subdirectory(uc8159)
  add_subdirectory(uc8151_legacy)
@@ -10,25 +10,25 @@ index 5c005228..bc25862d 100644
  add_subdirectory(pwm)
  add_subdirectory(servo)
  add_subdirectory(encoder)
-@@ -38,4 +39,4 @@ add_subdirectory(vl53l5cx)
- add_subdirectory(pcf85063a)
- add_subdirectory(pms5003)
- add_subdirectory(sh1107)
--add_subdirectory(st7567)
+@@ -43,4 +44,4 @@ add_subdirectory(st7567)
+ add_subdirectory(psram_display)
+ add_subdirectory(shiftregister)
+ add_subdirectory(inky73)
+-add_subdirectory(mlx90640)
 \ No newline at end of file
-+add_subdirectory(st7567)
++add_subdirectory(mlx90640)
 diff --git a/libraries/badger2040/badger2040.cmake b/libraries/badger2040/badger2040.cmake
-index 6d8df34b..07f6fb66 100644
+index 2c97b22c..adc5f624 100644
 --- a/libraries/badger2040/badger2040.cmake
 +++ b/libraries/badger2040/badger2040.cmake
-@@ -8,4 +8,4 @@ target_sources(${LIB_NAME} INTERFACE
+@@ -20,4 +20,4 @@ target_sources(${LIB_NAME} INTERFACE
  target_include_directories(${LIB_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
  
  # Pull in pico libraries that we need
--target_link_libraries(${LIB_NAME} INTERFACE bitmap_fonts hershey_fonts pico_stdlib hardware_pwm uc8151_legacy)
-+target_link_libraries(${LIB_NAME} INTERFACE bitmap_fonts hershey_fonts pico_stdlib hardware_pwm ssd1681)
+-target_link_libraries(${LIB_NAME} INTERFACE bitmap_fonts hershey_fonts uc8151_legacy pico_stdlib hardware_pwm)
++target_link_libraries(${LIB_NAME} INTERFACE bitmap_fonts hershey_fonts ssd1681 pico_stdlib hardware_pwm)
 diff --git a/libraries/badger2040/badger2040.cpp b/libraries/badger2040/badger2040.cpp
-index 6be32b91..41b8d2a1 100644
+index 6be32b91..2af3e7bd 100644
 --- a/libraries/badger2040/badger2040.cpp
 +++ b/libraries/badger2040/badger2040.cpp
 @@ -64,7 +64,7 @@ namespace pimoroni {
@@ -40,19 +40,21 @@ index 6be32b91..41b8d2a1 100644
  
      // TODO: set default image?
    }
-@@ -124,9 +124,9 @@ namespace pimoroni {
+@@ -124,10 +124,10 @@ namespace pimoroni {
  
  
    void Badger2040::clear() {
 -    const uint32_t column_len = 128 / 8;
 -    const uint32_t buf_len = column_len * 296;
 -    uint8_t* buf = uc8151_legacy.get_frame_buffer();
+-    
 +    const uint32_t column_len = 200 / 8;
 +    const uint32_t buf_len = column_len * 200;
 +    uint8_t* buf = ssd1681.get_frame_buffer();
-     
++
      if (_pen == 0) {
        memset(buf, 0xff, buf_len);
+     }
 @@ -135,7 +135,7 @@ namespace pimoroni {
        memset(buf, 0, buf_len);
      }
@@ -124,7 +126,7 @@ index 6be32b91..41b8d2a1 100644
        }
      }
    }
-@@ -225,19 +225,19 @@ namespace pimoroni {
+@@ -225,8 +225,8 @@ namespace pimoroni {
      }
      w += _thickness - 1;
      h += _thickness - 1;
@@ -133,17 +135,16 @@ index 6be32b91..41b8d2a1 100644
 +    if (x + w > 200) {
 +      w = 200 - x;
      }
--    if (y + h > 128) {
--      h = 128 - y;
-+    if (y + h > 200) {
-+      h = 200 - y;
-     }
+     if (y + h > 128) {
+       h = 128 - y;
+@@ -234,10 +234,10 @@ namespace pimoroni {
  
      if (h >= 8) {
        // Directly write to the frame buffer when clearing a large area
 -      uint8_t* buf = uc8151_legacy.get_frame_buffer();
+-      
 +      uint8_t* buf = ssd1681.get_frame_buffer();
-       
++
        for(int cx = x; cx < x + w; cx++) {
 -        uint8_t* buf_ptr = &buf[cx * 16 + y / 8];
 +        uint8_t* buf_ptr = &buf[cx * 25 + y / 8];
@@ -222,7 +223,7 @@ index 6be32b91..41b8d2a1 100644
        hershey::text(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
          line(x1, y1, x2, y2);
 diff --git a/libraries/badger2040/badger2040.hpp b/libraries/badger2040/badger2040.hpp
-index 0d5b1731..b6bb21fc 100644
+index 0d5b1731..c5a6229e 100644
 --- a/libraries/badger2040/badger2040.hpp
 +++ b/libraries/badger2040/badger2040.hpp
 @@ -2,7 +2,7 @@
@@ -243,7 +244,7 @@ index 0d5b1731..b6bb21fc 100644
      const hershey::font_t *_font = &hershey::futural;
      const bitmap::font_t *_bitmap_font = nullptr;
      uint8_t _pen = 0;
-@@ -25,11 +25,11 @@ namespace pimoroni {
+@@ -25,7 +25,7 @@ namespace pimoroni {
  
    public:
      Badger2040()
@@ -252,11 +253,6 @@ index 0d5b1731..b6bb21fc 100644
      };
      // Constructor for Python-managed buffer
      Badger2040(uint8_t *framebuffer)
--      : uc8151_legacy(296, 128, framebuffer, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
-+      : ssd1681(200, 200, framebuffer, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
-     };
-     void init();
-     void update(bool blocking=false);
 diff --git a/micropython/examples/badger2040/micropython-builtins.cmake b/micropython/examples/badger2040/micropython-builtins.cmake
 index 68c04aee..97a000f5 100644
 --- a/micropython/examples/badger2040/micropython-builtins.cmake
@@ -280,24 +276,11 @@ index 68c04aee..97a000f5 100644
 +copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/ostentus_icons.py ostentus_icons)
 +copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/splashscreen_rd.py splashscreen_rd)
 +copy_module(usermod_badger2040 ${CMAKE_CURRENT_LIST_DIR}/../../../../../module_py/cap_touch.py cap_touch)
-diff --git a/micropython/modules/badger2040-micropython.cmake b/micropython/modules/badger2040-micropython.cmake
-index 160ea378..e8c24735 100644
---- a/micropython/modules/badger2040-micropython.cmake
-+++ b/micropython/modules/badger2040-micropython.cmake
-@@ -6,6 +6,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
- include(pimoroni_i2c/micropython)
- include(pimoroni_bus/micropython)
- 
-+include(../../../../module/ostentus_i2c/micropython)
-+
- include(breakout_dotmatrix/micropython)
- include(breakout_encoder/micropython)
- include(breakout_ioexpander/micropython)
 diff --git a/micropython/modules/badger2040/badger2040.c b/micropython/modules/badger2040/badger2040.c
-index 4aa0dfed..e6a9c439 100644
+index 8112ffe6..f62d9c50 100644
 --- a/micropython/modules/badger2040/badger2040.c
 +++ b/micropython/modules/badger2040/badger2040.c
-@@ -104,8 +104,8 @@ STATIC const mp_rom_map_elem_t badger2040_globals_table[] = {
+@@ -114,8 +114,8 @@ STATIC const mp_rom_map_elem_t badger2040_globals_table[] = {
      { MP_ROM_QSTR(MP_QSTR_SYSTEM_FAST), MP_ROM_INT(3) },
      { MP_ROM_QSTR(MP_QSTR_SYSTEM_TURBO), MP_ROM_INT(4) },
  
@@ -309,7 +292,7 @@ index 4aa0dfed..e6a9c439 100644
      { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(12) },
      { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(13) },
 diff --git a/micropython/modules/badger2040/badger2040.cpp b/micropython/modules/badger2040/badger2040.cpp
-index b6577e45..9f984e24 100644
+index de59c6d2..17697910 100644
 --- a/micropython/modules/badger2040/badger2040.cpp
 +++ b/micropython/modules/badger2040/badger2040.cpp
 @@ -82,8 +82,8 @@ mp_obj_t Badger2040_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_
@@ -354,3 +337,23 @@ index ded85199..339e61ea 100644
  )
  
  target_compile_definitions(usermod_${MOD_NAME} INTERFACE
+diff --git a/micropython/modules/micropython-common.cmake b/micropython/modules/micropython-common.cmake
+index 7ad640ea..450dba9c 100644
+--- a/micropython/modules/micropython-common.cmake
++++ b/micropython/modules/micropython-common.cmake
+@@ -2,6 +2,8 @@
+ include(pimoroni_i2c/micropython)
+ include(pimoroni_bus/micropython)
+ 
++include(../../../../module/ostentus_i2c/micropython)
++
+ # Pico Graphics Essential
+ include(hershey_fonts/micropython)
+ include(bitmap_fonts/micropython)
+@@ -51,4 +53,4 @@ include(modules_py/modules_py)
+ # endif()
+ 
+ # Must call `enable_ulab()` to enable
+-include(micropython-common-ulab)
+\ No newline at end of file
++include(micropython-common-ulab)

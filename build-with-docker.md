@@ -19,6 +19,11 @@ These preparation steps are only necessary once during setup
 
 ### Installing Docker
 
+> [!NOTE]
+> If you have installed
+[Docker Desktop](https://www.docker.com/products/docker-desktop/) on macOS
+you can skip this step.
+
 ```shell
 sudo apt install docker.io
 sudo usermod -a -G docker mike
@@ -48,6 +53,12 @@ Then run the build command again.
 ```shell
 docker run -dt \
 --user $(id -u):$(id -g) \
+--name ostentus \
+--mount type=bind,source=$(pwd)/,target=/ostentus \
+ostentus_build
+
+# macOS
+docker run -dt \
 --name ostentus \
 --mount type=bind,source=$(pwd)/,target=/ostentus \
 ostentus_build

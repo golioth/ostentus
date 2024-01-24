@@ -1,0 +1,19 @@
+diff --git a/micropython/_board/board-fixup.sh b/micropython/_board/board-fixup.sh
+index ad62502c..8e7ac387 100755
+--- a/micropython/_board/board-fixup.sh
++++ b/micropython/_board/board-fixup.sh
+@@ -12,10 +12,10 @@ fi
+ 
+ if [[ ! -d "$MPY_DIR/boards/$BOARD" ]] && [[ -d "$FIXUP_DIR/$NAME/$BOARD/" ]]; then
+     echo "Missing board dir. Copying: $FIXUP_DIR/$NAME/$BOARD/ to $MPY_DIR/boards/"
+-    cp -r "$FIXUP_DIR/$NAME/$BOARD/" "$MPY_DIR/boards/"
++    cp -r "$FIXUP_DIR/$NAME/$BOARD" "$MPY_DIR/boards/"
+ fi
+ 
+ if [[ -f "$FIXUP_DIR/$NAME/fixup.sh" ]]; then
+-    echo "Running custom fixup[.sh"
++    echo "Running custom fixup.sh"
+     bash "$FIXUP_DIR/$NAME/fixup.sh" "$FIXUP_DIR/$NAME" "$MPY_DIR"
+-fi
+\ No newline at end of file
++fi

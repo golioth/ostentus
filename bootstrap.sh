@@ -5,10 +5,11 @@ git submodule update --init
 
 pushd submodules/pimoroni-pico
 git submodule update --init
+git apply ../../patches/pimoroni-pico-board-fixup.patch
 popd
 
 pushd submodules/micropython
-git submodule update --init -- lib/pico-sdk lib/tinyusb
+git submodule update --init -- lib/pico-sdk lib/tinyusb lib/lwip lib/micropython-lib/ lib/mbedtls
 popd
 
 # Patch step used by pimoroni-pico

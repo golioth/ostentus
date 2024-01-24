@@ -45,11 +45,18 @@ docker_image_create:
 docker_image_remove:
 	@docker image rm ostentus_build
 
-
 # Create the ostentus docker container (and build the cross compiler)
 docker_container_create:
 	@docker run -dt \
 	 --user $(shell id -u):$(shell id -g) \
+	 --name ostentus \
+	 --mount type=bind,source=$(shell pwd)/,target=/ostentus \
+	 ostentus_build
+	@docker exec -w /ostentus/submodules/micropython ostentus make -C mpy-cross
+
+# No need to set --user on macOS
+docker_container_create_mac:
+	@docker run -dt \
 	 --name ostentus \
 	 --mount type=bind,source=$(shell pwd)/,target=/ostentus \
 	 ostentus_build
@@ -61,6 +68,9 @@ docker_container_remove:
 
 # Create ostentus_build image and use it to create the ostentus container
 docker_init: docker_image_create docker_container_create
+
+# macOS-specific init
+docker_init_mac: docker_image_create docker_container_create_mac
 
 # Clear all ostenus Docker files (Stop the container, remove the container, remove the image)
 docker_fullclean: docker_stop docker_container_remove docker_image_remove

@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for revB of ostentus. This matches compatibility of revA but does not
   yet implement the additional LEDs (multicolor on Golioth and User) or the
   accelerometer.
+- Bash script for processing image as default splashscreen
+
+### Changed
+- Update default splashscreen to use new Golioth branding
 
 ## [0.1.99] - 2024-04-05
 

@@ -5,7 +5,7 @@ from micropython import const
 cap1203_sda = 2
 cap1203_scl = 3
 cap1203_bus = 1
-cap1203_int_pin = 7
+cap1203_int_pin = 22
 i2c_addr = 0x28
 
 # Workaround for PCB errors

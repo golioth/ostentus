@@ -2,12 +2,19 @@ from machine import Pin
 from utime import sleep_ms
 
 class o_leds:
-    def __init__(self, power=15, battery=14, internet=13, golioth=12, user=11):
+    def __init__(self, power=15, battery=14, internet=13, golioth=11, user=8):
         self.power_icon = Pin(power, Pin.OUT, value=1)
         self.battery_icon = Pin(battery, Pin.OUT, value=1)
         self.internet_icon = Pin(internet, Pin.OUT, value=1)
         self.golioth_icon = Pin(golioth, Pin.OUT, value=1)
         self.user_icon = Pin(user, Pin.OUT, value=1)
+
+        # Not yet implemented
+
+        self.golioth_icon_G = Pin(12, Pin.OUT, value=1)
+        self.golioth_icon_B = Pin(9, Pin.OUT, value=1)
+        self.user_icon_R = Pin(7, Pin.OUT, value=1)
+        self.user_icon_B = Pin(6, Pin.OUT, value=1)
 
     def power(self, state):
         if state == 0:
@@ -43,8 +50,7 @@ class o_leds:
         if (bitmask & 1):
             self.user_icon.value(0)
         else:
-            self.user_icon.value
-            (1)
+            self.user_icon.value(1)
         if (bitmask & 2):
             self.golioth_icon.value(0)
         else:

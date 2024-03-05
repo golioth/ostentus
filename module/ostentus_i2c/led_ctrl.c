@@ -14,6 +14,11 @@ static const uint32_t LED_MASKS[5] = {
 void led_init(void) {
     gpio_init_mask(LED_ALL_MASK);
     gpio_set_dir_out_masked(LED_ALL_MASK);
+
+    // Set these LEDs low. They are not yet supported
+    gpio_init_mask(LED_USER_R | LED_USER_G | LED_GOLIOTH_G | LED_GOLIOTH_B);
+    gpio_set_dir_out_masked(LED_USER_R | LED_USER_G | LED_GOLIOTH_G | LED_GOLIOTH_B);
+    gpio_put_masked(LED_USER_R | LED_USER_G | LED_GOLIOTH_G | LED_GOLIOTH_B, 0);
 }
 
 void led_push_mask(uint8_t mask) {

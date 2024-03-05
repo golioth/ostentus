@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Breaking Changes
+- This release drops support for revA of Ostentus. Use version 0.1.99 for that
+  revision. To determine board revision, locate the Golioth icon, for revA
+  boards this is a "G", for newer revisions this is the Golioth giant logo.
+
+### Added
+- Support for revB of ostentus. This matches compatibility of revA but does not
+  yet implement the additional LEDs (multicolor on Golioth and User) or the
+  accelerometer.
+
 ## [0.1.99] - 2024-04-05
 
 ### Informational
